@@ -30,16 +30,21 @@
                          VerticalAlignment="Top"
                          Grid.ColumnSpan="3"
                          Padding="0,4,0,0"/>
-            <Button Content="..." Grid.Column="0"
+            <Button Grid.Column="0"
                     Name="DevicesPaneBtn"
                     Tapped="DevicesPaneBtn_Tapped"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"/>
+                    VerticalAlignment="Stretch" Background="Transparent">
+                <Button.Content>
+                    <FontIcon Glyph="&#xE700;"></FontIcon>
+                </Button.Content>
+            </Button>
             <TextBlock HorizontalAlignment="Stretch"
                        Name="TitleTxt"
                    VerticalAlignment="Center"
                    FontWeight="Bold"
                    Grid.Column="1"
+                       Margin="12,0,0,0"
                    Text="PROJECT ROME"/>
             <Button Content="S"
                     Grid.Column="2"
@@ -49,19 +54,51 @@
                     VerticalAlignment="Stretch"/>
         </Grid>
 
-        <SplitView Name="DevicesPane" Grid.Row="1" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="550">
+        <SplitView Name="DevicesPane" 
+                   Grid.Row="1"
+                   DisplayMode="CompactOverlay" 
+                   CompactPaneLength="50">
             <SplitView.Pane>
-            <Grid Grid.Row="1">
+                <Grid Background="{ThemeResource AppBarBackground}">
                     <ListView Name="ListB"
-                         ItemsSource="{x:Bind deviceList}"
-                         MinHeight="200">
+                         ItemsSource="{x:Bind deviceList}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vmx:RemoteSystem">
-                                <StackPanel>
-                                    <TextBlock Text="{x:Bind Path=DisplayName}"/>
+                                <Grid HorizontalAlignment="Left" Margin="-4,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="48"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse HorizontalAlignment="Left"
+                                             Height="36"
+                                             Width="36"
+                                             Fill="{ThemeResource AppBarButtonBackgroundPointerOver}"
+                                             Grid.Column="0">                                    
+                                    </Ellipse>
+                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX}, ConverterParameter=Initals }"
+                                               Grid.Column="0"
+                                               Margin="-12,0,0,0"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="{x:Bind Path=DisplayName}"
+                                               Grid.Column="1"
+                                               VerticalAlignment="Top"
+                                               HorizontalAlignment="Left"
+                                               TextAlignment="Left"
+                                               FontWeight="Normal"/>
+                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX} ,ConverterParameter=Connectivity}"
+                                               Grid.Column="1"
+                                               Foreground="{ThemeResource AutoSuggestBoxSuggestionsListBorderBrush}"
+                                               VerticalAlignment="Bottom"
+                                               HorizontalAlignment="Left"
+                                               TextAlignment="Left"
+                                               FontWeight="SemiLight"/>
+                                </Grid>
+                                    
+                                    <!--<TextBlock Text="{x:Bind Path=DisplayName}"/>
                                     <TextBlock Text="{x:Bind Converter={StaticResource ConverterX} ,ConverterParameter=Connectivity}"/>
-                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX}, ConverterParameter=Online}"/>
-                                </StackPanel>
+                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX}, ConverterParameter=Online}"/>-->
+
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>

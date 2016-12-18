@@ -186,7 +186,7 @@ namespace ProjectRome
         {
             var param = parameter.ToString();
             var device = value as RemoteSystem;
-            switch(param)
+            switch (param)
             {
                 case "Connectivity":
                     {
@@ -195,25 +195,15 @@ namespace ProjectRome
                         else
                             return "Internet";
                     }
-                case "Online":
-                    {
-                        switch (device.Status)
-                        {
-                            case RemoteSystemStatus.Available:
-                                return "Online";
-                            case RemoteSystemStatus.DiscoveringAvailability:
-                                return "Checking";
-                            case RemoteSystemStatus.Unavailable:
-                                return "Offline";
-                            case RemoteSystemStatus.Unknown:
-                                return "Unknown";
-                         }
-                        break;
-                    }
                 default:
                     break;
+
+                case "Initals":
+                    var st = device.DisplayName;
+                    return st[0].ToString();
             }
-            return "Error";
+                    return "Error";
+            
         }
 
         public object ConvertBack(object value, Type targetType,
