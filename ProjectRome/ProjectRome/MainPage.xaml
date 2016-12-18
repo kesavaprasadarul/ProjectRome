@@ -46,12 +46,7 @@
                    Grid.Column="1"
                        Margin="12,0,0,0"
                    Text="PROJECT ROME"/>
-            <Button Content="S"
-                    Grid.Column="2"
-                    HorizontalAlignment="Stretch"
-                    Name="DoIt" 
-                    Tapped="DoIt_Tapped"
-                    VerticalAlignment="Stretch"/>
+
         </Grid>
 
         <SplitView Name="DevicesPane" 
@@ -105,11 +100,30 @@
                     </ListView>
             </Grid>
             </SplitView.Pane>
-            <TextBox x:Name="uriTxtBox"
+            <Grid VerticalAlignment="Bottom" MinHeight="36">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="36"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="uriTxtBox"
                      PlaceholderText="Enter URL"
-                     MaxHeight="36"
-                     VerticalAlignment="Bottom"
+                     MinHeight="36"
+                     TextAlignment="Center"
+                     VerticalAlignment="Stretch"
                      />
+                <Button
+                    HorizontalAlignment="Stretch"
+                    Name="DoIt" 
+                    Tapped="DoIt_Tapped"
+                    Grid.Column="1"
+                    VerticalAlignment="Stretch">
+                    <Button.Content>
+                        <FontIcon Glyph="&#xE725;"/>
+                    </Button.Content>
+                </Button>
+            </Grid>
+            
+
         </SplitView>
     </Grid>
 </Page>
