@@ -5,10 +5,51 @@
     xmlns:local="using:ProjectRome"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
-
+    mc:Ignorable="d"
+    RequestedTheme="Dark">
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <ListBox Name="ListB" MinHeight="200"/>
-        <Button Name="DoIt" Tapped="DoIt_Tapped" MinWidth="250" MinHeight="50"/>
+        <!--<ListBox Name="ListB" MinHeight="200"/>
+        <Button Name="DoIt" Tapped="DoIt_Tapped" MinWidth="250" MinHeight="50"/>-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Background="{ThemeResource AppBarBackground}" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="48"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="48"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar IsIndeterminate="True" 
+                         Visibility="Visible"
+                         HorizontalAlignment="Stretch" 
+                         VerticalAlignment="Top"
+                         Grid.ColumnSpan="3"
+                         Padding="0,4,0,0"/>
+            <Button Content="..." Grid.Column="0"
+                    Name="DevicesPaneBtn"
+                    Tapped="DevicesPaneBtn_Tapped"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"/>
+            <TextBlock HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   FontWeight="Bold"
+                   Grid.Column="1"
+                   Text="PROJECT ROME"/>
+            <Button Content="S"
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    Name="DoIt" 
+                    Tapped="DoIt_Tapped"
+                    VerticalAlignment="Stretch"/>
+        </Grid>
+
+        <SplitView Name="DevicesPane" Grid.Row="1" DisplayMode="CompactOverlay" CompactPaneLength="50">
+            <SplitView.Pane>
+            <Grid Grid.Row="1">
+                <ListBox Name="ListB" MinHeight="200"/>
+            </Grid>
+            </SplitView.Pane>
+        </SplitView>
     </Grid>
 </Page>

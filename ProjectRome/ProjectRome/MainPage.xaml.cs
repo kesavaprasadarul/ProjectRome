@@ -28,7 +28,10 @@ namespace ProjectRome
     public enum NotifyType
     {
         StatusMessage,
-        ErrorMessage
+        ErrorMessage,
+        DeviceAdded,
+        DeviceUpdated,
+        DeviceRemoved
     }
     public sealed partial class MainPage : Page
     {
@@ -60,7 +63,7 @@ namespace ProjectRome
             List<IRemoteSystemFilter> localListOfFilters = new List<IRemoteSystemFilter>();
 
             // construct a discovery type filter that only allows "proximal" connections:
-            RemoteSystemDiscoveryTypeFilter discoveryFilter = new RemoteSystemDiscoveryTypeFilter(RemoteSystemDiscoveryType.Proximal);
+            RemoteSystemDiscoveryTypeFilter discoveryFilter = new RemoteSystemDiscoveryTypeFilter(RemoteSystemDiscoveryType.Any);
 
 
             // construct a device type filter that only allows desktop and mobile devices:
@@ -116,7 +119,7 @@ namespace ProjectRome
                 }
                 deviceList.Add(args.RemoteSystem);
                 deviceMap.Add(args.RemoteSystem.Id, args.RemoteSystem);
-                UpdateStatus("Device updated with Id = " + args.RemoteSystem.DisplayName, NotifyType.StatusMessage);
+                UpdateStatus(args.RemoteSystem, NotifyType.DeviceUpdated);
             });
         }
 
@@ -127,7 +130,7 @@ namespace ProjectRome
                 if (deviceMap.ContainsKey(args.RemoteSystemId))
                 {
                     deviceList.Remove(deviceMap[args.RemoteSystemId]);
-                    UpdateStatus(deviceMap[args.RemoteSystemId].DisplayName + " removed.", NotifyType.StatusMessage);
+                    UpdateStatus(deviceMap[args.RemoteSystemId].DisplayName + " removed.", NotifyType.DeviceRemoved);
                     deviceMap.Remove(args.RemoteSystemId);
                 }
             });
@@ -139,13 +142,19 @@ namespace ProjectRome
             {
                 deviceList.Add(args.RemoteSystem);
                 deviceMap.Add(args.RemoteSystem.Id, args.RemoteSystem);
-                UpdateStatus(string.Format("Found {0} devices.", deviceList.Count), NotifyType.StatusMessage);
+                UpdateStatus(args.RemoteSystem, NotifyType.DeviceAdded);
             });
         }
 
-        private void UpdateStatus(string status, NotifyType statusType)
+        private void UpdateStatus(object RemoteSystem, NotifyType statusType)
         {
-            ListB.Items.Add(status);
+            switch(statusType)
+            {
+                case NotifyType.DeviceAdded:
+                    ListB.Items.Add(((RemoteSystem)RemoteSystem).DisplayName);
+                    break;
+            }
+
         }
 
         private async void DoIt_Tapped(object sender, TappedRoutedEventArgs e)
@@ -155,6 +164,11 @@ namespace ProjectRome
                 await RemoteLauncher.LaunchUriAsync(
                     new RemoteSystemConnectionRequest(SelectedDevice),
                     new Uri("bingmaps:?cp=47.6204~-122.3491&sty=3d&rad=200&pit=75&hdg=165"));
+        }
+
+        private void DevicesPaneBtn_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            DevicesPane.IsPaneOpen = !DevicesPane.IsPaneOpen;
         }
     }
 }
