@@ -53,7 +53,7 @@ namespace ProjectRome
         {
             var parameters = e.Parameter.ToString();
             if (parameters != "")
-                TitleTxt.Text = "ParameterLaunch";
+                TitleTxt.Text = parameters;
         }
 
         private async Task<bool> CheckifAllowed()
@@ -123,7 +123,7 @@ namespace ProjectRome
                 {
                     deviceList.Remove(deviceMap[args.RemoteSystem.Id]);
                     deviceMap.Remove(args.RemoteSystem.Id);
-                }
+                }               
                 deviceList.Add(args.RemoteSystem);
                 deviceMap.Add(args.RemoteSystem.Id, args.RemoteSystem);
                 UpdateStatus(args.RemoteSystem, NotifyType.DeviceUpdated);
@@ -155,13 +155,13 @@ namespace ProjectRome
 
         private void UpdateStatus(object RemoteSystem, NotifyType statusType)
         {
-            switch(statusType)
+            var rS = RemoteSystem as RemoteSystem;
+            foreach (var item in deviceList)
             {
-                case NotifyType.DeviceAdded:
-                    ListB.Items.Add(((RemoteSystem)RemoteSystem).DisplayName);
-                    break;
+                if (item.DisplayName == rS.DisplayName&& item.IsAvailableByProximity!=rS.IsAvailableByProximity && item.Status!=rS.Status && statusType == NotifyType.DeviceUpdated)
+                    deviceList.Remove(item);
+                break;
             }
-
         }
 
         private async void DoIt_Tapped(object sender, TappedRoutedEventArgs e)
@@ -178,4 +178,48 @@ namespace ProjectRome
             DevicesPane.IsPaneOpen = !DevicesPane.IsPaneOpen;
         }
     }
+
+    public class deviceListHelper:IValueConverter
+    {
+        public object Convert(object value, Type targetType,
+            object parameter, string language)
+        {
+            var param = parameter.ToString();
+            var device = value as RemoteSystem;
+            switch(param)
+            {
+                case "Connectivity":
+                    {
+                        if (device.IsAvailableByProximity == true)
+                            return "LAN";
+                        else
+                            return "Internet";
+                    }
+                case "Online":
+                    {
+                        switch (device.Status)
+                        {
+                            case RemoteSystemStatus.Available:
+                                return "Online";
+                            case RemoteSystemStatus.DiscoveringAvailability:
+                                return "Checking";
+                            case RemoteSystemStatus.Unavailable:
+                                return "Offline";
+                            case RemoteSystemStatus.Unknown:
+                                return "Unknown";
+                         }
+                        break;
+                    }
+                default:
+                    break;
+            }
+            return "Error";
+        }
+
+        public object ConvertBack(object value, Type targetType,
+    object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }        
 }

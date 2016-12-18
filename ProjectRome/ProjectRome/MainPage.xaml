@@ -3,10 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ProjectRome"
+    xmlns:vmx ="using:Windows.System.RemoteSystems"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     RequestedTheme="Dark">
+    <UserControl.Resources>
+        <local:deviceListHelper x:Key="ConverterX"/>
+    </UserControl.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <!--<ListBox Name="ListB" MinHeight="200"/>
         <Button Name="DoIt" Tapped="DoIt_Tapped" MinWidth="250" MinHeight="50"/>-->
@@ -45,10 +49,22 @@
                     VerticalAlignment="Stretch"/>
         </Grid>
 
-        <SplitView Name="DevicesPane" Grid.Row="1" DisplayMode="CompactOverlay" CompactPaneLength="50">
+        <SplitView Name="DevicesPane" Grid.Row="1" DisplayMode="CompactOverlay" CompactPaneLength="50" OpenPaneLength="550">
             <SplitView.Pane>
             <Grid Grid.Row="1">
-                <ListBox Name="ListB" MinHeight="200"/>
+                    <ListView Name="ListB"
+                         ItemsSource="{x:Bind deviceList}"
+                         MinHeight="200">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="vmx:RemoteSystem">
+                                <StackPanel>
+                                    <TextBlock Text="{x:Bind Path=DisplayName}"/>
+                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX} ,ConverterParameter=Connectivity}"/>
+                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX}, ConverterParameter=Online}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
             </Grid>
             </SplitView.Pane>
         </SplitView>
