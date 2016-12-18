@@ -49,6 +49,13 @@ namespace ProjectRome
             SearchByRemoteSystemWatcher();
         }
 
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            var parameters = e.Parameter.ToString();
+            if (parameters != "")
+                TitleTxt.Text = "ParameterLaunch";
+        }
+
         private async Task<bool> CheckifAllowed()
         {
             RemoteSystemAccessStatus accessStatus = await RemoteSystem.RequestAccessAsync();
