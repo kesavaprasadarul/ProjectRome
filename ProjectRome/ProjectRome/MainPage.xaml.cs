@@ -16,6 +16,7 @@ using Windows.System.RemoteSystems;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Windows.UI.Core;
+using Windows.System;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -24,6 +25,11 @@ namespace ProjectRome
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
+    public enum NotifyType
+    {
+        StatusMessage,
+        ErrorMessage
+    }
     public sealed partial class MainPage : Page
     {
         ObservableCollection<RemoteSystem> deviceList = new ObservableCollection<RemoteSystem>();
@@ -35,7 +41,17 @@ namespace ProjectRome
             // store filter list
             List<IRemoteSystemFilter> listOfFilters = makeFilterList();
             // construct watcher with the list
+            var status = CheckifAllowed();
             m_remoteSystemWatcher = RemoteSystem.CreateWatcher(listOfFilters);
+            SearchByRemoteSystemWatcher();
+        }
+
+        private async Task<bool> CheckifAllowed()
+        {
+            RemoteSystemAccessStatus accessStatus = await RemoteSystem.RequestAccessAsync();
+            if (accessStatus == RemoteSystemAccessStatus.Allowed)
+                return true;
+            else return false;
         }
 
         private List<IRemoteSystemFilter> makeFilterList()
@@ -87,7 +103,6 @@ namespace ProjectRome
             m_remoteSystemWatcher.Start();
 
             UpdateStatus("Searching for devices...", NotifyType.StatusMessage);
-            DeviceListBox.Visibility = Visibility.Visible;
         }
 
         private async void RemoteSystemWatcher_RemoteSystemUpdated(RemoteSystemWatcher sender, RemoteSystemUpdatedEventArgs args)
@@ -101,7 +116,7 @@ namespace ProjectRome
                 }
                 deviceList.Add(args.RemoteSystem);
                 deviceMap.Add(args.RemoteSystem.Id, args.RemoteSystem);
-                UpdateStatus("Device updated with Id = " + args.RemoteSystem.Id, NotifyType.StatusMessage);
+                UpdateStatus("Device updated with Id = " + args.RemoteSystem.DisplayName, NotifyType.StatusMessage);
             });
         }
 
@@ -128,5 +143,18 @@ namespace ProjectRome
             });
         }
 
+        private void UpdateStatus(string status, NotifyType statusType)
+        {
+            ListB.Items.Add(status);
+        }
+
+        private async void DoIt_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            RemoteSystem SelectedDevice = deviceList[0];
+            RemoteLaunchUriStatus launchUriStatus =
+                await RemoteLauncher.LaunchUriAsync(
+                    new RemoteSystemConnectionRequest(SelectedDevice),
+                    new Uri("bingmaps:?cp=47.6204~-122.3491&sty=3d&rad=200&pit=75&hdg=165"));
+        }
     }
 }

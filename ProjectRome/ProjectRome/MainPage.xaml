@@ -8,6 +8,7 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+        <ListBox Name="ListB" MinHeight="200"/>
+        <Button Name="DoIt" Tapped="DoIt_Tapped" MinWidth="250" MinHeight="50"/>
     </Grid>
 </Page>
