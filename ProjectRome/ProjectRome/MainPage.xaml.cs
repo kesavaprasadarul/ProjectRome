@@ -35,6 +35,7 @@ namespace ProjectRome
     }
     public sealed partial class MainPage : Page
     {
+        RemoteSystem SelectedDevice;
         ObservableCollection<RemoteSystem> deviceList = new ObservableCollection<RemoteSystem>();
         Dictionary<string, RemoteSystem> deviceMap = new Dictionary<string, RemoteSystem>();
         private RemoteSystemWatcher m_remoteSystemWatcher;
@@ -166,16 +167,24 @@ namespace ProjectRome
 
         private async void DoIt_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            RemoteSystem SelectedDevice = deviceList[0];
+
             RemoteLaunchUriStatus launchUriStatus =
+                //await RemoteLauncher.LaunchUriAsync(
+                //    new RemoteSystemConnectionRequest(SelectedDevice),
+                //    new Uri("bingmaps:?cp=47.6204~-122.3491&sty=3d&rad=200&pit=75&hdg=165"));
                 await RemoteLauncher.LaunchUriAsync(
                     new RemoteSystemConnectionRequest(SelectedDevice),
-                    new Uri("bingmaps:?cp=47.6204~-122.3491&sty=3d&rad=200&pit=75&hdg=165"));
+                    new Uri(uriTxtBox.Text));
         }
 
         private void DevicesPaneBtn_Tapped(object sender, TappedRoutedEventArgs e)
         {
             DevicesPane.IsPaneOpen = !DevicesPane.IsPaneOpen;
+        }
+
+        private void ListB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SelectedDevice = ListB.SelectedItem as RemoteSystem;
         }
     }
 

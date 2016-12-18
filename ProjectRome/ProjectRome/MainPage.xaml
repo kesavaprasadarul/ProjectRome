@@ -61,7 +61,8 @@
             <SplitView.Pane>
                 <Grid Background="{ThemeResource AppBarBackground}">
                     <ListView Name="ListB"
-                         ItemsSource="{x:Bind deviceList}">
+                              SelectionChanged="ListB_SelectionChanged"
+                              ItemsSource="{x:Bind deviceList}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="vmx:RemoteSystem">
                                 <Grid HorizontalAlignment="Left" Margin="-4,8">
@@ -104,6 +105,11 @@
                     </ListView>
             </Grid>
             </SplitView.Pane>
+            <TextBox x:Name="uriTxtBox"
+                     PlaceholderText="Enter URL"
+                     MaxHeight="36"
+                     VerticalAlignment="Bottom"
+                     />
         </SplitView>
     </Grid>
 </Page>
