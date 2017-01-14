@@ -221,6 +221,23 @@ namespace ProjectRome.Views
             cdWarpLink.Hide();
             spButtons.Visibility = Visibility.Visible;
         }
+
+        private void cdWarpLink_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            try
+            {
+                cdSelectDevice.Hide();
+            }
+            catch
+            { }
+            try
+            {
+                cdWarpLink.Hide();
+            }
+            catch
+            { }
+            spButtons.Visibility = Visibility.Visible;
+        }
     }
 
 

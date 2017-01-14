@@ -49,8 +49,10 @@
         <ContentDialog x:Name="cdWarpLink"
                        Visibility="Visible"
                        Title="Warp link"
+                       SecondaryButtonText="Cancel"
+                       SecondaryButtonClick="cdWarpLink_SecondaryButtonClick"
                        IsPrimaryButtonEnabled="False"
-                       IsSecondaryButtonEnabled="False"
+                       IsSecondaryButtonEnabled="True"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center">
             <Grid>
@@ -85,6 +87,7 @@
                 <Button x:Name="btnWarpLinkCancel"
                         Grid.Row="1"
                         Grid.ColumnSpan="2"
+                        Visibility="Collapsed"
                         Content="Cancel"
                         HorizontalAlignment="Stretch"
                         Click="btnWarpLinkCancel_Click" />
@@ -96,7 +99,11 @@
                        Visibility="Collapsed"
                        Title="Select a device"
                        HorizontalAlignment="Center"
-                       VerticalAlignment="Center">
+                       VerticalAlignment="Center"
+                       SecondaryButtonText="Cancel"
+                       SecondaryButtonClick="cdWarpLink_SecondaryButtonClick"
+                       IsPrimaryButtonEnabled="False"
+                       IsSecondaryButtonEnabled="True">
             <StackPanel Orientation="Vertical">
                 <ListView x:Name="lvDevices"
                           ItemsSource="{x:Bind deviceList}"
