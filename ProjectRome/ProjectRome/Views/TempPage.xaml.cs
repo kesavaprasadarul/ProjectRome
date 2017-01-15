@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer.ShareTarget;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
@@ -36,6 +38,9 @@ namespace ProjectRome.Views
             DeviceRemoved
         }
 
+        Uri shareUrl;
+        ShareOperation shareOperation;
+
         RemoteSystem SelectedDevice;
         ObservableCollection<RemoteSystem> deviceList = new ObservableCollection<RemoteSystem>();
         Dictionary<string, RemoteSystem> deviceMap = new Dictionary<string, RemoteSystem>();
@@ -51,11 +56,19 @@ namespace ProjectRome.Views
             SearchByRemoteSystemWatcher();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            var parameters = e.Parameter.ToString();
-            //if (parameters != "")
-            //TitleTxt.Text = parameters;
+            try
+            {
+                shareOperation = (ShareOperation)e.Parameter;
+                shareUrl = await shareOperation.Data.GetWebLinkAsync();
+                //TODO Make ENTER URL show up first, and then Select device --> CONTENT FIRST, DEVICE SECOND!
+            }
+            catch
+            {
+
+            }
+
         }
 
         private async Task<bool> CheckifAllowed()
@@ -182,6 +195,12 @@ namespace ProjectRome.Views
             SelectedDevice = (RemoteSystem)e.ClickedItem;
             cdSelectDevice.Hide();
             cdWarpLink.ShowAsync();
+            try
+            {
+                txtWarpLink.Text = shareUrl.AbsoluteUri;
+                shareUrl = null;
+            }
+            catch { }
         }
 
         private async void btnSendUrl_Click(object sender, RoutedEventArgs e)
@@ -200,13 +219,29 @@ namespace ProjectRome.Views
             await Task.Delay(TimeSpan.FromSeconds(3));  // Wait 3 secs before hiding stuff again
             spAllSet.Visibility = Visibility.Collapsed;
             spButtons.Visibility = Visibility.Visible;
+
+            try
+            {
+                shareOperation.ReportCompleted();
+            }
+            catch
+            {
+                try
+                {
+                    shareOperation.DismissUI();
+                }
+                catch
+                {
+                    Debug.WriteLine("No Share operation");
+                }
+            }
         }
 
-        private void btnWarpLink_Click(object sender, RoutedEventArgs e)
+        private async void btnWarpLink_Click(object sender, RoutedEventArgs e)
         {
             lvDevices.SelectedItem = null;
             cdSelectDevice.Visibility = Visibility.Visible;
-            cdSelectDevice.ShowAsync();
+            await cdSelectDevice.ShowAsync();
         }
 
         private async void lvDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)

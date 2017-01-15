@@ -137,5 +137,17 @@ namespace ProjectRome
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
+
+        protected override void OnShareTargetActivated(ShareTargetActivatedEventArgs args)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame == null)
+            {
+                rootFrame = new Frame();
+                Window.Current.Content = rootFrame;
+            }
+            rootFrame.Navigate(typeof(Views.TempPage), args.ShareOperation);
+            Window.Current.Activate();
+        }
     }
 }
