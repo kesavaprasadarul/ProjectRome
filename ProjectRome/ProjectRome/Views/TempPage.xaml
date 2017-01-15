@@ -96,7 +96,7 @@
 
         <!-- Select Device dialog-->
         <ContentDialog x:Name="cdSelectDevice"
-                       Visibility="Collapsed"
+                       Visibility="Visible"
                        Title="Select a device"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
@@ -147,9 +147,16 @@
                        Title="Warping..."
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"
-                       Visibility="Collapsed">
+                       Visibility="Visible">
             <Grid>
-                <StackPanel Margin="0,12,0,0">
+                <!-- TODO: Make this a cool warping animation -->
+                <ProgressRing x:Name="pgrWarping"
+                              Height="72"
+                              Width="72"
+                              IsActive="True" />
+
+                <StackPanel Margin="0,12,0,0"
+                            Visibility="Collapsed">
                     <ProgressBar x:Name="pgbSending" />
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="50"
@@ -161,10 +168,10 @@
                     </StackPanel>
                 </StackPanel>
 
-                <Button x:Name="btnCancelSending"
+                <!--<Button x:Name="btnCancelSending"
                         VerticalAlignment="Bottom"
                         HorizontalAlignment="Stretch"
-                        Content="Cancel" />
+                        Content="Cancel" />-->
             </Grid>
         </ContentDialog>
     </Grid>

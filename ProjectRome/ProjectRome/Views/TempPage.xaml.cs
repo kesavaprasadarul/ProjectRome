@@ -27,6 +27,13 @@ using Windows.UI.Xaml.Navigation;
 
 namespace ProjectRome.Views
 {
+
+    //TODO Seperate UI from code
+    //TODO Rename things with a name that makes sense (and not use too similar names, herpderp)
+    //TODO Clean up this awful mess I made (Ikarago)
+    //TODO UX test on both PC and Mobile (950 + 435) and see what needs to be changed in the UI/UX
+
+
     public sealed partial class TempPage : Page
     {
         public enum NotifyType
@@ -39,6 +46,7 @@ namespace ProjectRome.Views
         }
 
         Uri shareUrl;
+        string urlToWarp;
         ShareOperation shareOperation;
 
         RemoteSystem SelectedDevice;
@@ -194,27 +202,20 @@ namespace ProjectRome.Views
         {
             SelectedDevice = (RemoteSystem)e.ClickedItem;
             cdSelectDevice.Hide();
-            cdWarpLink.ShowAsync();
-            try
-            {
-                txtWarpLink.Text = shareUrl.AbsoluteUri;
-                shareUrl = null;
-            }
-            catch { }
-        }
+            cdWarping.ShowAsync();
 
-        private async void btnSendUrl_Click(object sender, RoutedEventArgs e)
-        {
+
             RemoteLaunchUriStatus launchUriStatus =
             //await RemoteLauncher.LaunchUriAsync(
             //    new RemoteSystemConnectionRequest(SelectedDevice),
             //    new Uri("bingmaps:?cp=47.6204~-122.3491&sty=3d&rad=200&pit=75&hdg=165"));
             await RemoteLauncher.LaunchUriAsync(
                 new RemoteSystemConnectionRequest(SelectedDevice),
-                new Uri(txtWarpLink.Text));
+                new Uri(urlToWarp));
 
             spButtons.Visibility = Visibility.Collapsed;
-            cdWarpLink.Hide();
+            cdWarping.Hide();
+
             spAllSet.Visibility = Visibility.Visible;
             await Task.Delay(TimeSpan.FromSeconds(3));  // Wait 3 secs before hiding stuff again
             spAllSet.Visibility = Visibility.Collapsed;
@@ -237,11 +238,28 @@ namespace ProjectRome.Views
             }
         }
 
+        private async void btnSendUrl_Click(object sender, RoutedEventArgs e)
+        {
+            urlToWarp = txtWarpLink.Text;
+
+
+            cdWarpLink.Hide();
+            await cdSelectDevice.ShowAsync();
+
+        }
+
         private async void btnWarpLink_Click(object sender, RoutedEventArgs e)
         {
             lvDevices.SelectedItem = null;
-            cdSelectDevice.Visibility = Visibility.Visible;
-            await cdSelectDevice.ShowAsync();
+
+            try
+            {
+                txtWarpLink.Text = shareUrl.AbsoluteUri;
+                shareUrl = null;
+            }
+            catch { }
+            await cdWarpLink.ShowAsync();
+
         }
 
         private async void lvDevices_SelectionChanged(object sender, SelectionChangedEventArgs e)
