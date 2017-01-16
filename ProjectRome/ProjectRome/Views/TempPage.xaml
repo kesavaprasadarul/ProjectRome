@@ -1,0 +1,178 @@
+﻿<Page
+    x:Class="ProjectRome.Views.TempPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ProjectRome.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vmx ="using:Windows.System.RemoteSystems"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel x:Name="spButtons" 
+                    Visibility="Visible"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+            <Button x:Name="btnWarpLink"
+                    Background="Transparent"
+                    Click="btnWarpLink_Click">
+                <Grid>
+                    <Ellipse Width="96"
+                             Height="96"
+                             Fill="{ThemeResource SystemControlBackgroundAccentBrush}"/>
+                    <TextBlock Text="&#xE167;"
+                               Style="{ThemeResource HeaderTextBlockStyle}"
+                               FontFamily="Segoe MDL2 Assets"
+                               RequestedTheme="Dark"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
+        </StackPanel>
+
+        <StackPanel x:Name="spAllSet"
+                    Visibility="Collapsed"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Orientation="Vertical">
+            <TextBlock Text="&#xE081;"
+                       FontFamily="Segoe MDL2 Assets"
+                       HorizontalAlignment="Center"
+                       Style="{ThemeResource HeaderTextBlockStyle}"/>
+            <TextBlock Text="Warping complete!" 
+                       Margin="0,12"
+                       HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Warp link dialog -->
+        <ContentDialog x:Name="cdWarpLink"
+                       Visibility="Visible"
+                       Title="Warp link"
+                       SecondaryButtonText="Cancel"
+                       SecondaryButtonClick="cdWarpLink_SecondaryButtonClick"
+                       IsPrimaryButtonEnabled="False"
+                       IsSecondaryButtonEnabled="True"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="32" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBox x:Name="txtWarpLink"
+                         Grid.Column="0"
+                         Grid.Row="0"
+                         Margin="0,12"
+                         PlaceholderText="Enter a URL..." 
+                         VerticalAlignment="Top"/>
+                <Button x:Name="btnSendUrl"
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        Margin="0,12"
+                        Content="&#xE122;"
+                        FontFamily="Segoe MDL2 Assets"
+                        Height="32"
+                        Background="{ThemeResource SystemControlBackgroundAccentBrush}"
+                        RequestedTheme="Dark"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        Click="btnSendUrl_Click"/>
+
+                <Button x:Name="btnWarpLinkCancel"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2"
+                        Visibility="Collapsed"
+                        Content="Cancel"
+                        HorizontalAlignment="Stretch"
+                        Click="btnWarpLinkCancel_Click" />
+            </Grid>
+        </ContentDialog>
+
+        <!-- Select Device dialog-->
+        <ContentDialog x:Name="cdSelectDevice"
+                       Visibility="Visible"
+                       Title="Select a device"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       SecondaryButtonText="Cancel"
+                       SecondaryButtonClick="cdWarpLink_SecondaryButtonClick"
+                       IsPrimaryButtonEnabled="False"
+                       IsSecondaryButtonEnabled="True">
+            <StackPanel Orientation="Vertical">
+                <ListView x:Name="lvDevices"
+                          ItemsSource="{x:Bind deviceList}"
+                          IsItemClickEnabled="True"
+                          ItemClick="lvDevices_ItemClick" 
+                          SelectionChanged="lvDevices_SelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vmx:RemoteSystem">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE1C9;"
+                                       FontFamily="Segoe MDL2 Assets" 
+                                       Style="{ThemeResource TitleTextBlockStyle}"/>
+                                <StackPanel Orientation="Vertical"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Path=DisplayName}"
+                                           Style="{ThemeResource BodyTextBlockStyle}"
+                                           VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <!--<ListViewItem>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE1C9;"
+                                       FontFamily="Segoe MDL2 Assets" 
+                                       Style="{ThemeResource TitleTextBlockStyle}"/>
+                            <StackPanel Orientation="Vertical"
+                                        VerticalAlignment="Center">
+                                <TextBlock Text="Device"
+                                           Style="{ThemeResource BodyTextBlockStyle}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ListViewItem>-->
+                </ListView>
+            </StackPanel>
+        </ContentDialog>
+
+        <!-- Warp dialog -->
+        <ContentDialog x:Name="cdWarping"
+                       Title="Warping..."
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Visibility="Visible">
+            <Grid>
+                <!-- TODO: Make this a cool warping animation -->
+                <ProgressRing x:Name="pgrWarping"
+                              Height="72"
+                              Width="72"
+                              IsActive="True" />
+
+                <StackPanel Margin="0,12,0,0"
+                            Visibility="Collapsed">
+                    <ProgressBar x:Name="pgbSending" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="50"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="/" 
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                        <TextBlock Text="100"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!--<Button x:Name="btnCancelSending"
+                        VerticalAlignment="Bottom"
+                        HorizontalAlignment="Stretch"
+                        Content="Cancel" />-->
+            </Grid>
+        </ContentDialog>
+    </Grid>
+</Page>

@@ -73,7 +73,7 @@ namespace ProjectRome
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(Views.TempPage), e.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
@@ -119,7 +119,7 @@ namespace ProjectRome
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage),comments);
+                    rootFrame.Navigate(typeof(Views.TempPage),comments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
@@ -136,6 +136,18 @@ namespace ProjectRome
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        protected override void OnShareTargetActivated(ShareTargetActivatedEventArgs args)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame == null)
+            {
+                rootFrame = new Frame();
+                Window.Current.Content = rootFrame;
+            }
+            rootFrame.Navigate(typeof(Views.TempPage), args.ShareOperation);
+            Window.Current.Activate();
         }
     }
 }
