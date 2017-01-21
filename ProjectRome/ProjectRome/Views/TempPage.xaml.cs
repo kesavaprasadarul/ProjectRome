@@ -305,6 +305,12 @@ namespace ProjectRome.Views
         {
 
         }
+
+        private async void btnGoToGitHub_Click(object sender, RoutedEventArgs e)
+        {
+            var uri = new Uri(@"https://github.com/kesavaprasadarul/ProjectRome");
+            var success = await Windows.System.Launcher.LaunchUriAsync(uri);
+        }
     }
 
 
