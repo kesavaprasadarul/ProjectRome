@@ -17,6 +17,11 @@
             <Button x:Name="btnWarpLink"
                     Background="Transparent"
                     Click="btnWarpLink_Click">
+                <Button.Transitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition/>
+                    </TransitionCollection>
+                </Button.Transitions>
                 <Grid>
                     <Ellipse Width="96"
                              Height="96"
@@ -49,9 +54,11 @@
         <ContentDialog x:Name="cdWarpLink"
                        Visibility="Visible"
                        Title="Warp link"
+                       PrimaryButtonText="Send"
+                       PrimaryButtonClick="cdWarpLink_PrimaryButtonClick"
                        SecondaryButtonText="Cancel"
                        SecondaryButtonClick="cdWarpLink_SecondaryButtonClick"
-                       IsPrimaryButtonEnabled="False"
+                       IsPrimaryButtonEnabled="True"
                        IsSecondaryButtonEnabled="True"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center">
@@ -60,21 +67,18 @@
                     <ColumnDefinition />
                     <ColumnDefinition Width="32" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
 
                 <TextBox x:Name="txtWarpLink"
                          Grid.Column="0"
                          Grid.Row="0"
-                         Margin="0,12"
+                         Grid.ColumnSpan="2"
                          PlaceholderText="Enter a URL..." 
-                         VerticalAlignment="Top"/>
+                         VerticalAlignment="Center"/>
                 <Button x:Name="btnSendUrl"
+                        Visibility="Collapsed"
                         Grid.Column="1"
                         Grid.Row="0"
-                        Margin="0,12"
+                        Margin="0,12,0,0"
                         Content="&#xE122;"
                         FontFamily="Segoe MDL2 Assets"
                         Height="32"
@@ -114,13 +118,13 @@
                         <DataTemplate x:DataType="vmx:RemoteSystem">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE1C9;"
-                                       FontFamily="Segoe MDL2 Assets" 
-                                       Style="{ThemeResource TitleTextBlockStyle}"/>
+                                           FontFamily="Segoe MDL2 Assets" 
+                                           Style="{ThemeResource TitleTextBlockStyle}"/>
                                 <StackPanel Orientation="Vertical"
-                                        VerticalAlignment="Center">
+                                            VerticalAlignment="Center">
                                     <TextBlock Text="{x:Bind Path=DisplayName}"
-                                           Style="{ThemeResource BodyTextBlockStyle}"
-                                           VerticalAlignment="Center"/>
+                                               Style="{ThemeResource BodyTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
                                 </StackPanel>
                             </StackPanel>
                         </DataTemplate>
@@ -151,6 +155,7 @@
             <Grid>
                 <!-- TODO: Make this a cool warping animation -->
                 <ProgressRing x:Name="pgrWarping"
+                              Margin="0,24,0,0"
                               Height="72"
                               Width="72"
                               IsActive="True" />
@@ -174,5 +179,15 @@
                         Content="Cancel" />-->
             </Grid>
         </ContentDialog>
+        
+        
+        <!-- Commandbar -->
+        <CommandBar x:Name="cmbar"
+                    VerticalAlignment="Bottom" ClosedDisplayMode="Minimal">
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:Name="cbtnAbout"
+                              Content="About" />
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
     </Grid>
 </Page>

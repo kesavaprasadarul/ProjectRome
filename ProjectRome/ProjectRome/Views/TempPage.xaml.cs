@@ -291,6 +291,15 @@ namespace ProjectRome.Views
             { }
             spButtons.Visibility = Visibility.Visible;
         }
+
+        private async void cdWarpLink_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            urlToWarp = txtWarpLink.Text;
+
+
+            cdWarpLink.Hide();
+            await cdSelectDevice.ShowAsync();
+        }
     }
 
 
