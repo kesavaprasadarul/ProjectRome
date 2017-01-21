@@ -117,7 +117,8 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="vmx:RemoteSystem">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="&#xE1C9;"
+                                <TextBlock Text="&#xEC64;"
+                                           Margin="0,0,8,0"
                                            FontFamily="Segoe MDL2 Assets" 
                                            Style="{ThemeResource TitleTextBlockStyle}"/>
                                 <StackPanel Orientation="Vertical"
