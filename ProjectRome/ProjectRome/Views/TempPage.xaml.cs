@@ -300,6 +300,11 @@ namespace ProjectRome.Views
             cdWarpLink.Hide();
             await cdSelectDevice.ShowAsync();
         }
+
+        private void cbtnAbout_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
 
