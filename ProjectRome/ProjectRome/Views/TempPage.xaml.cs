@@ -102,6 +102,7 @@ namespace ProjectRome.Views
             List<String> listOfTypes = new List<String>();
             listOfTypes.Add(RemoteSystemKinds.Desktop);
             listOfTypes.Add(RemoteSystemKinds.Phone);
+            listOfTypes.Add(RemoteSystemKinds.Xbox);
 
             // Put the list of device types into the constructor of the filter
             RemoteSystemKindFilter kindFilter = new RemoteSystemKindFilter(listOfTypes);
@@ -290,6 +291,26 @@ namespace ProjectRome.Views
             catch
             { }
             spButtons.Visibility = Visibility.Visible;
+        }
+
+        private async void cdWarpLink_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            urlToWarp = txtWarpLink.Text;
+
+
+            cdWarpLink.Hide();
+            await cdSelectDevice.ShowAsync();
+        }
+
+        private void cbtnAbout_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private async void btnGoToGitHub_Click(object sender, RoutedEventArgs e)
+        {
+            var uri = new Uri(@"https://github.com/kesavaprasadarul/ProjectRome");
+            var success = await Windows.System.Launcher.LaunchUriAsync(uri);
         }
     }
 
