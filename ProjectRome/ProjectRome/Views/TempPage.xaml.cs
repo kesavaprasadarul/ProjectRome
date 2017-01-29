@@ -311,6 +311,12 @@ namespace ProjectRome.Views
             var uri = new Uri(@"https://github.com/kesavaprasadarul/ProjectRome");
             var success = await Windows.System.Launcher.LaunchUriAsync(uri);
         }
+
+        private async void cbtnSendFeedback_Click(object sender, RoutedEventArgs e)
+        {
+            var uri = new Uri(@"https://github.com/kesavaprasadarul/ProjectRome/issues");
+            var success = await Windows.System.Launcher.LaunchUriAsync(uri);
+        }
     }
 
 
