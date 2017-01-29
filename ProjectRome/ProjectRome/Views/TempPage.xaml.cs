@@ -102,7 +102,6 @@ namespace ProjectRome.Views
             List<String> listOfTypes = new List<String>();
             listOfTypes.Add(RemoteSystemKinds.Desktop);
             listOfTypes.Add(RemoteSystemKinds.Phone);
-            listOfTypes.Add(RemoteSystemKinds.Xbox);
 
             // Put the list of device types into the constructor of the filter
             RemoteSystemKindFilter kindFilter = new RemoteSystemKindFilter(listOfTypes);
@@ -295,11 +294,32 @@ namespace ProjectRome.Views
 
         private async void cdWarpLink_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            urlToWarp = txtWarpLink.Text;
+            // Test URL; if valid go futher, if not; stop and show message
 
 
-            cdWarpLink.Hide();
-            await cdSelectDevice.ShowAsync();
+            try
+            {
+                Uri testUrl = new Uri(txtWarpLink.Text);
+
+                urlToWarp = txtWarpLink.Text;
+
+                try
+                {
+                    tblNonValidUrl.Visibility = Visibility.Collapsed;
+                }
+                catch { }
+                cdWarpLink.Hide();
+                await cdSelectDevice.ShowAsync();
+            }
+            catch
+            {
+                try
+                {
+                    tblNonValidUrl.Visibility = Visibility.Visible;
+                }
+                catch { }
+            }
+
         }
 
         private void cbtnAbout_Click(object sender, RoutedEventArgs e)
@@ -310,6 +330,12 @@ namespace ProjectRome.Views
         private async void btnGoToGitHub_Click(object sender, RoutedEventArgs e)
         {
             var uri = new Uri(@"https://github.com/kesavaprasadarul/ProjectRome");
+            var success = await Windows.System.Launcher.LaunchUriAsync(uri);
+        }
+
+        private async void cbtnSendFeedback_Click(object sender, RoutedEventArgs e)
+        {
+            var uri = new Uri(@"https://github.com/kesavaprasadarul/ProjectRome/issues");
             var success = await Windows.System.Launcher.LaunchUriAsync(uri);
         }
     }
