@@ -54,7 +54,7 @@
         <ContentDialog x:Name="cdWarpLink"
                        Visibility="Visible"
                        Title="Warp link"
-                       PrimaryButtonText="Send"
+                       PrimaryButtonText="Next"
                        PrimaryButtonClick="cdWarpLink_PrimaryButtonClick"
                        SecondaryButtonText="Cancel"
                        SecondaryButtonClick="cdWarpLink_SecondaryButtonClick"
@@ -62,40 +62,17 @@
                        IsSecondaryButtonEnabled="True"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="32" />
-                </Grid.ColumnDefinitions>
-
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock x:Name="tblNonValidUrl"
+                           Visibility="Collapsed"
+                           Text="Whoops! URL is not valid"
+                           Margin="0,6"
+                           Style="{ThemeResource BodyTextBlockStyle}"
+                           Foreground="Red"/>
                 <TextBox x:Name="txtWarpLink"
-                         Grid.Column="0"
-                         Grid.Row="0"
-                         Grid.ColumnSpan="2"
                          PlaceholderText="Enter a URL..." 
                          VerticalAlignment="Center"/>
-                <Button x:Name="btnSendUrl"
-                        Visibility="Collapsed"
-                        Grid.Column="1"
-                        Grid.Row="0"
-                        Margin="0,12,0,0"
-                        Content="&#xE122;"
-                        FontFamily="Segoe MDL2 Assets"
-                        Height="32"
-                        Background="{ThemeResource SystemControlBackgroundAccentBrush}"
-                        RequestedTheme="Dark"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Top"
-                        Click="btnSendUrl_Click"/>
-
-                <Button x:Name="btnWarpLinkCancel"
-                        Grid.Row="1"
-                        Grid.ColumnSpan="2"
-                        Visibility="Collapsed"
-                        Content="Cancel"
-                        HorizontalAlignment="Stretch"
-                        Click="btnWarpLinkCancel_Click" />
-            </Grid>
+            </StackPanel>            
         </ContentDialog>
 
         <!-- Select Device dialog-->

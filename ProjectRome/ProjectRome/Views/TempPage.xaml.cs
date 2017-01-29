@@ -294,11 +294,32 @@ namespace ProjectRome.Views
 
         private async void cdWarpLink_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            urlToWarp = txtWarpLink.Text;
+            // Test URL; if valid go futher, if not; stop and show message
 
 
-            cdWarpLink.Hide();
-            await cdSelectDevice.ShowAsync();
+            try
+            {
+                Uri testUrl = new Uri(txtWarpLink.Text);
+
+                urlToWarp = txtWarpLink.Text;
+
+                try
+                {
+                    tblNonValidUrl.Visibility = Visibility.Collapsed;
+                }
+                catch { }
+                cdWarpLink.Hide();
+                await cdSelectDevice.ShowAsync();
+            }
+            catch
+            {
+                try
+                {
+                    tblNonValidUrl.Visibility = Visibility.Visible;
+                }
+                catch { }
+            }
+
         }
 
         private void cbtnAbout_Click(object sender, RoutedEventArgs e)
