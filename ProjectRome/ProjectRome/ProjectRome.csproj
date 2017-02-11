@@ -99,10 +99,12 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\Class1.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\RomeTask.cs" />
     <Compile Include="Views\TempPage.xaml.cs">
       <DependentUpon>TempPage.xaml</DependentUpon>
     </Compile>
