@@ -7,9 +7,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <local:deviceListHelper x:Key="ConverterX"/>
-    </UserControl.Resources>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <!--<ListBox Name="ListB" MinHeight="200"/>
         <Button Name="DoIt" Tapped="DoIt_Tapped" MinWidth="250" MinHeight="50"/>-->

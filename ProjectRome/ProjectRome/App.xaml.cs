@@ -76,7 +76,7 @@ namespace ProjectRome
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(Views.TempPage), e.Arguments);
+                    rootFrame.Navigate(typeof(Views.StartPage), e.Arguments);
                 }
                 SetTitlebar();
                 // Ensure the current window is active
@@ -123,7 +123,7 @@ namespace ProjectRome
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(Views.TempPage),comments);
+                    rootFrame.Navigate(typeof(Views.StartPage),comments);
                 }
             SetTitlebar();
             // Ensure the current window is active
