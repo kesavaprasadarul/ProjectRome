@@ -78,13 +78,13 @@
                                                HorizontalAlignment="Left"
                                                TextAlignment="Left"
                                                FontWeight="Normal"/>
-                                    <TextBlock Text="{x:Bind Converter={StaticResource ConverterX} ,ConverterParameter=Connectivity}"
+                                    <!--<TextBlock Text="{x:Bind Converter={StaticResource ConverterX} ,ConverterParameter=Connectivity}"
                                                Grid.Column="1"
                                                Foreground="{ThemeResource AutoSuggestBoxSuggestionsListBorderBrush}"
                                                VerticalAlignment="Bottom"
                                                HorizontalAlignment="Left"
                                                TextAlignment="Left"
-                                               FontWeight="SemiLight"/>
+                                               FontWeight="SemiLight"/>-->
                                 </Grid>
                                     
                                     <!--<TextBlock Text="{x:Bind Path=DisplayName}"/>

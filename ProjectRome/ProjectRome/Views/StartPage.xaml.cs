@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -55,33 +56,6 @@ namespace ProjectRome.Views
             {
                  await ReceiveFileFomPeer(rSocket);
             });
-            //DataReader reader = new DataReader(args.Socket.InputStream);
-            //try
-            //{
-            //    while (true)
-            //    {
-            //        // Read first 4 bytes (length of the subsequent string).
-            //        uint sizeFieldCount = await reader.LoadAsync(sizeof(uint));
-            //        if (sizeFieldCount != sizeof(uint))
-            //        {
-            //            // The underlying socket was closed before we were able to read the whole data.
-            //            return;
-            //        }
-
-            //        // Read the string.
-            //        uint stringLength = reader.ReadUInt32();
-            //        uint actualStringLength = await reader.LoadAsync(stringLength);
-            //        if (stringLength != actualStringLength)
-            //        {
-            //            // The underlying socket was closed before we were able to read the whole data.
-            //            return;
-            //        }
-            //        var s = reader.ReadString(actualStringLength);
-            //    }
-
-            //}
-            //catch { }
-
         }
 
         private async void sendBtn_Click(object sender, RoutedEventArgs e)
@@ -94,17 +68,13 @@ namespace ProjectRome.Views
             picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.MusicLibrary;
             StorageFile file = await picker.PickSingleFileAsync();
             await SendFileToPeerAsync(socket, file);
-            //var writer = new DataWriter(socket.OutputStream);
-            //string stringToSend = "Hello";
-            //writer.WriteUInt32(writer.MeasureString(stringToSend));
-            //writer.WriteString(stringToSend);
-            //await writer.StoreAsync();
-            
         }
 
         private async Task SendFileToPeerAsync(StreamSocket socket, StorageFile selectedFile)
         {
-            byte[] buff = new byte[4096];
+            long streamPosition = 0;
+            long streamSize = 0;
+            byte[] buff = new byte[65536];
             var prop = await selectedFile.GetBasicPropertiesAsync();
             using (var dw = new DataWriter(socket.OutputStream))
             {
@@ -116,20 +86,42 @@ namespace ProjectRome.Views
                 dw.WriteUInt64(prop.Size);
                 // 4. Send the file
                 var fileStream = await selectedFile.OpenStreamForReadAsync();
-                while (fileStream.Position < (long)prop.Size)
+                streamSize = fileStream.Length;
+                while (streamPosition < streamSize)
+                {                
+                int len = 0;                
+                fileStream.Position = streamPosition;
+                long memAlloc = fileStream.Length - streamPosition < 65536 ? fileStream.Length - streamPosition : 65536;
+                byte[] buffer = new byte[memAlloc];
+                while (dw.UnstoredBufferLength < memAlloc)
                 {
-                    var rlen = await fileStream.ReadAsync(buff, 0, buff.Length);
-                    dw.WriteBytes(buff);
+                    len = fileStream.Read(buffer, 0, buffer.Length);
+                    if (len > 0)
+                    {
+                        dw.WriteBytes(buffer);
+                        streamPosition += len;
+                    }
                 }
 
-                await dw.FlushAsync();
-                await dw.StoreAsync();
-                await socket.OutputStream.FlushAsync();
+                try
+                {
+                    await dw.StoreAsync();
+                }
+                catch
+                {
+                    Debug.WriteLine(string.Format("Failed to store {0} bytes.", dw.UnstoredBufferLength));
+                }
+                GC.Collect();                
+                }
+                dw.Dispose();
             }
         }
 
+
         private async Task<bool> ReceiveFileFomPeer(StreamSocket socket)
         {
+            long streamSize = 0;
+            long streamPosition = 0;
             StorageFile file =null;
             using (var rw = new DataReader(socket.InputStream))
             {
@@ -142,22 +134,32 @@ namespace ProjectRome.Views
                 //3. Read the file length
                 await rw.LoadAsync(sizeof(UInt64));
                 var fileLength = rw.ReadUInt64();
-
-                // 4. Reading file
-                var memStream = await DownloadFile(rw, fileLength);
+                // 4. Reading file                
                 var picker = new Windows.Storage.Pickers.FileSavePicker();
                 picker.FileTypeChoices.Add("Any", new List<string> { ".mp4" });
                 picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
                 // Dropdown of file types the user can save the file as
                 picker.SuggestedFileName = "New Document";
                 file = await picker.PickSaveFileAsync();
-                if (file != null)
-                    using (var fileStream1 = await file.OpenAsync(FileAccessMode.ReadWrite))
+                var fileStream = await file.OpenStreamForWriteAsync();
+                streamSize =Convert.ToInt64(fileLength);
+                while(streamPosition<streamSize)
+                {
+                    fileStream.Position = Convert.ToInt64(streamPosition);
+                    long memAlloc = streamSize - streamPosition < 65536 ? streamSize - streamPosition : 65536;
+                    byte[] buffer = new byte[memAlloc];
+                    while (rw.UnconsumedBufferLength < memAlloc)
                     {
-                        await RandomAccessStream.CopyAndCloseAsync(
-                            memStream.GetInputStreamAt(0), fileStream1.GetOutputStreamAt(0));
+                        var lenToRead = memAlloc;
+                        await rw.LoadAsync((uint)lenToRead);
+                        var tempBuff = rw.ReadBuffer((uint)lenToRead);
+                        fileStream.Write(buffer, 0, buffer.Length);
+                        streamPosition += fileStream.Length;
                     }
-                    rw.DetachStream();
+                    GC.Collect();
+                 }
+                rw.DetachStream();
+                rw.Dispose();
 
             }
  
@@ -171,7 +173,7 @@ namespace ProjectRome.Views
             // Download the file
             while (memStream.Position < fileLength)
             {               
-                var lenToRead = Math.Min(4096, fileLength - memStream.Position);
+                var lenToRead = Math.Min(65536, fileLength - memStream.Position);
                 await rw.LoadAsync((uint)lenToRead);
                 var tempBuff = rw.ReadBuffer((uint)lenToRead);
                 await memStream.WriteAsync(tempBuff);
