@@ -35,12 +35,10 @@ namespace ProjectRome.Views
     public sealed partial class StartPage : Page
     {
         StreamSocket rSocket;
-        public List<PeerInformation> nearbyDevices = new List<PeerInformation>();
-        StreamSocketListener listener = new StreamSocketListener();
         public StartPage()
         {
             this.InitializeComponent();
-            initListenerAsync().AsAsyncAction();
+            initListenerAsync().AsAsyncAction().AsTask().Wait();
         }
 
         private async Task initListenerAsync()
@@ -48,30 +46,6 @@ namespace ProjectRome.Views
             StreamSocketListener listener = new StreamSocketListener();
             listener.ConnectionReceived += OnConnectionAsync;
             await listener.BindServiceNameAsync("8083");
-            if (PeerFinder.SupportedDiscoveryTypes != PeerDiscoveryTypes.None)
-            {
-                PeerFinder.ConnectionRequested += PeerFinder_ConnectionRequested;
-                PeerFinder.Stop();
-                PeerFinder.Start();
-                var watcher = PeerFinder.CreateWatcher();
-                watcher.Added += Watcher_Added;
-                watcher.Start();
-            }
-        }
-
-        private void Watcher_Added(PeerWatcher sender, PeerInformation args)
-        {
-            nearbyDevices.Add(args);
-        }
-
-        private async void PeerFinder_ConnectionRequested(object sender, ConnectionRequestedEventArgs args)
-        {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-             async () =>
-             {
-                 StreamSocket socket = await PeerFinder.ConnectAsync(args.PeerInformation);
-                 await ReceiveFileFomPeer(socket);                 
-             });
         }
 
         private async void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
@@ -84,22 +58,10 @@ namespace ProjectRome.Views
             });
         }
 
-        public async Task<StreamSocket> getSocketFromProximityAsync()
-        {
-            StreamSocket x = null;
-            if (nearbyDevices.Count != 0)
-                x = await PeerFinder.ConnectAsync(nearbyDevices[0]);
-            return x;
-        }
-
         private async void sendBtn_Click(object sender, RoutedEventArgs e)
-        {        
+        {
             StreamSocket socket = new StreamSocket();
             socket.Control.KeepAlive = false;
-            var testSocket = await getSocketFromProximityAsync();
-            if (testSocket != null)
-                socket = testSocket;
-            else
             await socket.ConnectAsync(new HostName(ipTxtBox.Text), "8083");
             var picker = new Windows.Storage.Pickers.FileOpenPicker();
             picker.FileTypeFilter.Add(".mp4");
