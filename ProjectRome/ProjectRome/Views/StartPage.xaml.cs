@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NotificationsExtensions;
+using NotificationsExtensions.Toasts;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,6 +19,7 @@ using Windows.Networking.Sockets;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Core;
+using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -51,6 +54,31 @@ namespace ProjectRome.Views
         private async void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
             rSocket = args.Socket;
+
+            var toast = new ToastContent();
+            toast.Visual = new ToastVisual();
+
+            toast.Visual.BindingGeneric = new ToastBindingGeneric()
+            {
+                Children =
+                    {
+                        new AdaptiveText()
+                        {
+                            Text = "Warpin'",
+                            HintStyle = AdaptiveTextStyle.Title
+                        },
+
+                        new AdaptiveText()
+                        {
+                            Text = "Well helloooooooooooooo nurse!"
+                        }
+                    }
+            };
+
+            var toastNotification = new ToastNotification(toast.GetXml());
+            ToastNotificationManager.CreateToastNotifier().Show(toastNotification);
+
+
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
             async () =>
             {
