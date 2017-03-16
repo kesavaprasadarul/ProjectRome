@@ -184,6 +184,15 @@
   <ItemGroup>
     <Folder Include="Assets\Music\" />
   </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WarpzoneBackend\WarpzoneBackend.csproj">
+      <Project>{96be3041-b232-4bfb-ab30-95a578bace8e}</Project>
+      <Name>WarpzoneBackend</Name>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

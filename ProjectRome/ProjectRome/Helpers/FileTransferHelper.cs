@@ -56,7 +56,7 @@ namespace ProjectRome.Helpers
             Debug.WriteLine("Ping received Successfully");
             remoteHost = args.Socket.Information;
             //Forward to send function
-            sendPayload();
+            sendPayload(null);
         }
 
         private void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
@@ -71,9 +71,10 @@ namespace ProjectRome.Helpers
             transferProgress = (Convert.ToInt16(current / actual)) * 100;
         }
 
-        public async void sendPayload()
+        public async void sendPayload(StorageFile file)
         {
-            var file = await getFileLocationAsync(PickerType.Open, "", "");
+            if(file==null)
+            file = await getFileLocationAsync(PickerType.Open, "", "");
             transferSocket = new StreamSocket();
             transferSocket.Control.KeepAlive = false;
             if(remoteHost!=null)
@@ -169,6 +170,7 @@ namespace ProjectRome.Helpers
                     case PickerType.Open:
                         var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
                         pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+                        pickerO.FileTypeFilter.Add("*");
                         file =  await pickerO.PickSingleFileAsync();
                         break;
                     case PickerType.Save:

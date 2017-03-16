@@ -14,6 +14,7 @@
             <TextBlock x:Name="fileName" FontWeight="SemiBold"/>
             <TextBlock x:Name="fileSize" FontWeight="Light"/>
             <ProgressBar x:Name="transferProgressBar" Width="250" Maximum="100"/>
+            <ListView x:Name="remoteSystemList" ItemsSource="{x:Bind RemoteSystems, Mode=TwoWay}" Margin="12,12" Foreground="Wheat" Background="Gray" SelectionChanged="ListBox_SelectionChanged"/>
         </StackPanel>
     </Grid>
 </Page>
