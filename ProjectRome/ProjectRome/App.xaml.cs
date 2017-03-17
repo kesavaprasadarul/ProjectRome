@@ -96,6 +96,27 @@ namespace ProjectRome
 
         protected override void OnActivated(IActivatedEventArgs args)
         {
+            if(args.Kind == ActivationKind.ToastNotification)
+            {
+                var toastArgs = args as ToastNotificationActivatedEventArgs;
+                var arguments = toastArgs.Argument;
+
+                if (arguments == "check")
+                {
+                    Frame rootFrameX = Window.Current.Content as Frame;
+                    if (rootFrameX == null)
+                    {
+                        rootFrameX = new Frame();
+                        Window.Current.Content = rootFrameX;
+                    }
+                    if (rootFrameX.Content.GetType() != typeof(Views.StartPage))
+                    {
+                        rootFrameX.Navigate(typeof(Views.StartPage));
+                        Window.Current.Activate();
+                    }
+                }
+            }
+
             if (args.Kind == ActivationKind.Protocol)
             {
                 ProtocolActivatedEventArgs eventArgs = args as ProtocolActivatedEventArgs;

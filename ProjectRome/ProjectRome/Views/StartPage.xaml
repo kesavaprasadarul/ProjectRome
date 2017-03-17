@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:ProjectRome.Views"
     xmlns:controls ="using:ProjectRome.Controls"
+    xmlns:vmx ="using:Windows.System.RemoteSystems"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -14,7 +15,16 @@
             <TextBlock x:Name="fileName" FontWeight="SemiBold"/>
             <TextBlock x:Name="fileSize" FontWeight="Light"/>
             <ProgressBar x:Name="transferProgressBar" Width="250" Maximum="100"/>
-            <ListView x:Name="remoteSystemList" ItemsSource="{x:Bind RemoteSystems, Mode=TwoWay}" Margin="12,12" Foreground="Wheat" Background="Gray" SelectionChanged="ListBox_SelectionChanged"/>
+            <TextBox x:Name="addressBar"/>
+            <Button Content="Warp Link" x:Name="sendLinkBtn" Margin="0,4" Click="sendLinkBtn_Click" HorizontalAlignment="Center"/>
+            <Button Content="Send File" x:Name="sendBtn" Margin="0,4" Click="sendBtn_Click" HorizontalAlignment="Center"/>
+            <ListView x:Name="remoteSystemList" Margin="12,12" Foreground="Wheat" Background="Gray" SelectionChanged="ListBox_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="vmx:RemoteSystem">
+                        <TextBlock Text="{x:Bind DisplayName}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </StackPanel>
     </Grid>
 </Page>

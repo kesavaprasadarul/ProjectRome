@@ -6,10 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Core;
+using Windows.UI.Xaml;
 
 namespace ProjectRome.Helpers
 {
@@ -22,8 +24,14 @@ namespace ProjectRome.Helpers
         StreamSocketListener listener;
         StreamSocketListener pListener;
         StreamSocket transferSocket;
-        StreamSocketInformation remoteHost;
-
+        //StreamSocketInformation remoteHost;
+        public HostName remoteHostInfo;
+        public uint filenameLength;
+        public string originalFilename;
+        public ulong fileLength;
+        public long streamSize = 0;
+        public long streamPosition = 0;
+        public DataReader rw;
         public async Task<bool> initTransferListener()
         {
             try
@@ -54,16 +62,18 @@ namespace ProjectRome.Helpers
         private void PListener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
             Debug.WriteLine("Ping received Successfully");
-            remoteHost = args.Socket.Information;
+            remoteHostInfo = args.Socket.Information.LocalAddress;
             //Forward to send function
             sendPayload(null);
         }
 
-        private void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
+        private async void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
             Debug.WriteLine("Transfer Request Received Successfully.");
             //Call another function to receive file
-            getPayload(args.Socket);
+
+           // getPayload(args.Socket);
+            
         }
 
         private void convertToPercents(Int64 current, Int64 actual)
@@ -77,9 +87,9 @@ namespace ProjectRome.Helpers
             file = await getFileLocationAsync(PickerType.Open, "", "");
             transferSocket = new StreamSocket();
             transferSocket.Control.KeepAlive = false;
-            if(remoteHost!=null)
+            if(remoteHostInfo != null)
             {
-                await transferSocket.ConnectAsync(remoteHost.LocalAddress, powerPort.ToString());
+                await transferSocket.ConnectAsync(remoteHostInfo, powerPort.ToString());
                 long streamPosition = 0;
                 long streamSize = 0;
                 byte[] buff = new byte[bufferSize];
@@ -120,68 +130,77 @@ namespace ProjectRome.Helpers
             }
          }
 
-        public async void getPayload (StreamSocket socket)
+        public async Task getPayload(StreamSocket socket, StorageFile file)
+        {
+            var fileStream = await file.OpenStreamForWriteAsync();
+            streamSize = Convert.ToInt64(fileLength);
+            while (streamPosition < streamSize)
+            {
+                fileStream.Position = Convert.ToInt64(streamPosition);
+                long memAlloc = streamSize - streamPosition < 65536 ? streamSize - streamPosition : 65536;
+                byte[] buffer = new byte[memAlloc];
+                while (rw.UnconsumedBufferLength < memAlloc)
+                {
+                    var lenToRead = memAlloc;
+                    await rw.LoadAsync((uint)lenToRead);
+                    var tempBuff = rw.ReadBuffer((uint)lenToRead);
+                    fileStream.Write(buffer, 0, buffer.Length);
+                    streamPosition += fileStream.Length;
+                }
+                GC.Collect();
+                convertToPercents(streamPosition, streamSize);
+            }
+            rw.DetachStream();
+            rw.Dispose();
+        }
+
+        public async Task getPayloadInfo (StreamSocket socket)
         {
             long streamSize = 0;
             long streamPosition = 0;
-            using (var rw = new DataReader(socket.InputStream))
+            rw = new DataReader(socket.InputStream);
             {
                 // 1. Read the filename length
                 await rw.LoadAsync(sizeof(Int32));
-                var filenameLength = (uint)rw.ReadInt32();
+                filenameLength = (uint)rw.ReadInt32();
                 // 2. Read the filename
                 await rw.LoadAsync(filenameLength);
-                var originalFilename = rw.ReadString(filenameLength);
+                originalFilename = rw.ReadString(filenameLength);
                 //3. Read the file length
                 await rw.LoadAsync(sizeof(UInt64));
-                var fileLength = rw.ReadUInt64();
-                var file = await getFileLocationAsync(PickerType.Save, (originalFilename.Split('.')[1]), originalFilename);
-                var fileStream = await file.OpenStreamForWriteAsync();
-                streamSize = Convert.ToInt64(fileLength);
-                while (streamPosition < streamSize)
-                {
-                    fileStream.Position = Convert.ToInt64(streamPosition);
-                    long memAlloc = streamSize - streamPosition < 65536 ? streamSize - streamPosition : 65536;
-                    byte[] buffer = new byte[memAlloc];
-                    while (rw.UnconsumedBufferLength < memAlloc)
-                    {
-                        var lenToRead = memAlloc;
-                        await rw.LoadAsync((uint)lenToRead);
-                        var tempBuff = rw.ReadBuffer((uint)lenToRead);
-                        fileStream.Write(buffer, 0, buffer.Length);
-                        streamPosition += fileStream.Length;
-                    }
-                    GC.Collect();
-                    convertToPercents(streamPosition, streamSize);
-                }
-                rw.DetachStream();
-                rw.Dispose();
+                fileLength = rw.ReadUInt64();
+                //var file = await Views.StartPage.getFileLocationAsync(Views.PickerType.Save, originalFilename, (originalFilename.Split('.')).Last());
+                
             }
         }
 
         public async Task<StorageFile> getFileLocationAsync(PickerType type, string name, string extension = ".txt")
         {
             StorageFile file = null;
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
-            async () =>
-            {
+
                 switch (type)
                 {
                     case PickerType.Open:
                         var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
                         pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
                         pickerO.FileTypeFilter.Add("*");
-                        file =  await pickerO.PickSingleFileAsync();
+                    await Application.Current.Resources.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                    {
+                        file = await pickerO.PickSingleFileAsync();
+                    });
                         break;
                     case PickerType.Save:
                         var pickerS = new Windows.Storage.Pickers.FileSavePicker();
                         pickerS.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
                         pickerS.SuggestedFileName = name;
-                        pickerS.FileTypeChoices.Add("", new List<string> { extension });
-                        file = await pickerS.PickSaveFileAsync();
+                        pickerS.FileTypeChoices.Add("", new List<string> { "."+extension });
+                    await CoreWindow.GetForCurrentThread().Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                    { file = await pickerS.PickSaveFileAsync(); });
+                        
+                        
                         break;
                 }
-            });
+
             return file;
         }
 
