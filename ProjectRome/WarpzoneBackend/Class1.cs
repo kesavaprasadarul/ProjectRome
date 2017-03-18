@@ -9,7 +9,15 @@ using Windows.ApplicationModel.AppService;
 using Windows.ApplicationModel.Background;
 using Windows.Data.Xml.Dom;
 using Windows.Foundation.Collections;
+using System.Xml.Serialization;
 using Windows.UI.Notifications;
+using Microsoft.QueryStringDotNET;
+using Windows.ApplicationModel.DataTransfer;
+using System.Threading;
+using Newtonsoft.Json;
+using Windows.UI.Core;
+using Windows.Networking.Connectivity;
+using Windows.Networking;
 
 namespace WarpzoneBackend
 {
@@ -17,7 +25,10 @@ namespace WarpzoneBackend
     {
         private BackgroundTaskDeferral backgroundTaskDeferral;
         private AppServiceConnection appServiceconnection;
+        private string HostIP = "Empty";
 
+
+        [STAThread]
         public void Run(IBackgroundTaskInstance taskInstance)
         {
             this.backgroundTaskDeferral = taskInstance.GetDeferral(); // Get a deferral so that the service isn't terminated.
@@ -33,41 +44,18 @@ namespace WarpzoneBackend
         {
             var messageDeferral = args.GetDeferral();
             var data = args.Request.Message;
-            processData(data);
+            processParameters(data,args);
             //main code
             messageDeferral.Complete();
         }
 
 
-        public void processData(ValueSet data)
-        {
-            string header = "Undefined";
-            string desc = "Oolala";
-            foreach( var item in data)
-            {
-                if(item.Key== "type")
-                {
-                    switch (item.Value)
-                    {
-                        case "fileTransfer":
-                            header = "File Transfer Request";
-                            desc = data.Last().Value.ToString();
-                            break;
-                        default:
-                            header = "Undefined request";
-                            break;
-                    }
-                }
-                
-            }
-            sendToast(header, desc);
-        }
 
-        public void sendToast(string header, string desc)
+        public static void sendToast(string header, string desc,string subDesc)
         {
+
             ToastContent content = new ToastContent()
             {
-                Launch = "app-defined-string",
                 Visual = new ToastVisual()
                 {
                     BindingGeneric = new ToastBindingGeneric()
@@ -81,6 +69,11 @@ namespace WarpzoneBackend
                         new AdaptiveText()
                         {
                             Text = desc
+                        },
+
+                        new AdaptiveText()
+                        {
+                            Text = subDesc
                         }
                     },
 
@@ -93,7 +86,7 @@ namespace WarpzoneBackend
                     {
                         new ToastButton("check", "check")
                         {
-                           
+
                         },
 
                         new ToastButton("cancel", "cancel")
@@ -108,31 +101,6 @@ namespace WarpzoneBackend
             ToastNotificationManager.CreateToastNotifier().Show(toastNotification);
         }
 
-        public void sendNotification()
-        {
-            var xmlToastTemplate = "<toast launch=\"app-defined-string\">" +
-                         "<visual>" +
-                           "<binding template =\"ToastGeneric\">" +
-                             "<text>Sample Notification</text>" +
-                             "<text>" +
-                               "Test Notification" +
-                             "</text>" +
-                           "</binding>" +
-                         "</visual>" +
-                       "</toast>";
-
-            // load the template as XML document
-            var xmlDocument = new XmlDocument();
-            xmlDocument.LoadXml(xmlToastTemplate);
-
-            // create the toast notification and show to user
-            var toastNotification = new ToastNotification(xmlDocument);
-            var notification = ToastNotificationManager.CreateToastNotifier();
-            notification.Show(toastNotification);
-            
-        }
-
-
         private void OnTaskCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
             if (this.backgroundTaskDeferral != null)
@@ -141,5 +109,38 @@ namespace WarpzoneBackend
                 this.backgroundTaskDeferral.Complete();
             }
         }
+
+        HostName getLocalIP()
+        {
+            return NetworkInformation.GetHostNames().Single(r => r.Type == HostNameType.Ipv4);
+        }
+
+        void processParameters(ValueSet data, AppServiceRequestReceivedEventArgs args)
+        {
+            //var HostIP = data["host"].ToString();
+            //sendToast("Request", "Done!");
+            switch (data["type"].ToString())
+            {
+                case "fileTransfer":
+                    //code for file transfer, include notification
+                    sendToast("File Transfer", "Done!",data["host"].ToString());
+                    
+                    var payload = new ValueSet()
+                    {
+                        {"type","fileTransfer" },
+                        {"receiveIP", getLocalIP().CanonicalName.ToString()}
+                    };
+                    args.Request.SendResponseAsync(payload).AsTask().Wait();
+                    break;
+                case "clipboard":
+                    sendToast("Clipboard Died", "On Progess, hold on for updates!!", data["host"].ToString());
+                    //code for clipboard, include notification
+                    break;
+                default:
+                    //Notify for undefined parameter reception, ask to update the receiver
+                    break;
+            }
+        } 
+
     }
 }
