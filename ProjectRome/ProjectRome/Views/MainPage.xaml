@@ -5,6 +5,7 @@
     xmlns:local="using:ProjectRome.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vmx ="using:Windows.System.RemoteSystems"
     mc:Ignorable="d">
 
     <Page.Transitions>
@@ -12,29 +13,67 @@
             <EntranceThemeTransition />
         </TransitionCollection>
     </Page.Transitions>
+
+    <Page.Resources>
+        <Storyboard x:Name="sbWarpBackgroundAnimation">
+            <ColorAnimation Storyboard.TargetName="gridWarpBgAni"
+                            Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)"
+                            From="Transparent"
+                            To="DarkGray"
+                            Duration="0:0:1"
+                            AutoReverse="True"
+                            RepeatBehavior="Forever"/>
+
+        </Storyboard>
+        
+        
+        
+    </Page.Resources>
+    
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <!-- TODO: Inset Blurfetish -->
+        
+        <!-- TODO: Insert cool background warping animation -->
+        <Grid x:Name="gridWarpBgAni"
+              Canvas.ZIndex="2"
+              Visibility="Visible"
+              Background="Transparent"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            
+        </Grid>
+        
+        
+        
         <StackPanel Orientation="Vertical"
+                    Canvas.ZIndex="10"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center">
+            <StackPanel.ChildrenTransitions>
+                <TransitionCollection>
+                    <AddDeleteThemeTransition />
+                </TransitionCollection>
+            </StackPanel.ChildrenTransitions>
             <TextBlock x:Name="tblTitle"
-                       Text="Pick action..."
+                       Visibility="Collapsed"
+                       Text="Warping..."
                        FontWeight="Bold"
                        Style="{ThemeResource HeaderTextBlockStyle}"
                        HorizontalAlignment="Center"
-                       Margin="12"/>
+                       Margin="12,12,12,24"/>
+
             <!-- Initial Select Type -->
             <StackPanel x:Name="spSelectType"
-                        Orientation="Vertical">
+                        Orientation="Horizontal"
+                        Visibility="Collapsed">
 
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center">
                     <!-- Link -->
                     <Button x:Name="btnLink"
                             Margin="8,0"
                             Background="Transparent"
-                            HorizontalAlignment="Center">
+                            HorizontalAlignment="Center"
+                            Click="btnLink_Click">
                         <Button.Content>
                             <StackPanel Orientation="Vertical">
                                 <Grid>
@@ -44,6 +83,7 @@
                                     <TextBlock Text="&#xE167;"
                                                Style="{ThemeResource SubheaderTextBlockStyle}"
                                                FontFamily="Segoe MDL2 Assets"
+                                               TextAlignment="Center"
                                                RequestedTheme="Dark"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"/>
@@ -57,12 +97,12 @@
 
 
                     <!-- Text -->
-                    <StackPanel Orientation="Vertical"
-                                Margin="8,0">
-                        <Button x:Name="btnText"
-                                Background="Transparent"
-                                HorizontalAlignment="Center">
-                            <Button.Content>
+                    <Button x:Name="btnText"
+                            Background="Transparent"
+                            Margin="8,0"
+                            HorizontalAlignment="Center">
+                        <Button.Content>
+                            <StackPanel Orientation="Vertical">
                                 <Grid>
                                     <Ellipse Width="72"
                                              Height="72"
@@ -70,25 +110,25 @@
                                     <TextBlock Text="&#xE16D;"
                                                Style="{ThemeResource SubheaderTextBlockStyle}"
                                                FontFamily="Segoe MDL2 Assets"
+                                               TextAlignment="Center"
                                                RequestedTheme="Dark"
-                                               
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" TextAlignment="Center"/>
+                                               VerticalAlignment="Center" />
                                 </Grid>
-                            </Button.Content>
-                        </Button>
-                        <TextBlock Text="Text"
-                                   Margin="0,4,0,0"
-                                   HorizontalAlignment="Center"/>
-                    </StackPanel>
+                                <TextBlock Text="Text"
+                                           Margin="0,4,0,0"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
 
                     <!-- File -->
-                    <StackPanel Orientation="Vertical"
-                                Margin="8,0">
-                        <Button x:Name="btnFile"
-                                Background="Transparent"
-                                HorizontalAlignment="Center">
-                            <Button.Content>
+                    <Button x:Name="btnFile"
+                            Background="Transparent"
+                            Margin="8,0"
+                            HorizontalAlignment="Center">
+                        <Button.Content>
+                            <StackPanel>
                                 <Grid>
                                     <Ellipse Width="72"
                                              Height="72"
@@ -96,25 +136,144 @@
                                     <TextBlock Text="&#xE160;"
                                                Style="{ThemeResource SubheaderTextBlockStyle}"
                                                FontFamily="Segoe MDL2 Assets"
-                                               RequestedTheme="Dark"
-                                               
+                                               TextAlignment="Center"
+                                               RequestedTheme="Dark"                                               
                                                HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" TextAlignment="Center"/>
+                                               VerticalAlignment="Center" />
                                 </Grid>
-                            </Button.Content>
-                        </Button>
-                        <TextBlock Text="File"
-                                   Margin="0,4,0,0"
-                                   HorizontalAlignment="Center"/>
-                    </StackPanel>
+                                <TextBlock Text="File"
+                                           Margin="0,4,0,0"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+            </StackPanel>
+            <!-- END OF INITIAL SELECT TYPE -->
+
+            
+            <!-- Select Link -->
+            <StackPanel x:Name="spSelectLink"
+                        Visibility="Collapsed">
+                <!-- TODO - Make a custom style for this so it won't go white in Dark-theme -->
+                <TextBox x:Name="txtLink"
+                         PlaceholderText="Enter an URL"
+                         BorderThickness="0,0,0,1"
+                         Width="272"
+                         Padding="0,6"/>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="0,24,0,0">
+                    <Button x:Name="btnLinkBack"
+                            Content="Back" 
+                            Width="128"
+                            Margin="8"/>
+                    <Button x:Name="btnLinkNext"
+                            Background="{ThemeResource SystemControlBackgroundAccentBrush}"
+                            RequestedTheme="Dark"
+                            Content="Next"
+                            Width="128"
+                            Margin="8"/>
                 </StackPanel>
                 
             </StackPanel>
+            <!-- END OF SELECT LINK -->
+            
+            
+            <!-- Select Text -->
+            
+            <!-- END OF SELECT TEXT -->            
+            
+            
+            <!-- Select File -->                       
+            
+            <!-- END OF SELECT FILE -->        
+            
+            
+            <!-- Select device -->
+            <StackPanel x:Name="spSelectDevice"
+                        Visibility="Collapsed">
+                <ListView x:Name="lvDevices"
+                          IsItemClickEnabled="True"
+                          SelectionMode="None">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="vmx:RemoteSystem">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xEC64;"
+                                           Margin="0,0,8,0"
+                                           FontFamily="Segoe MDL2 Assets" 
+                                           Style="{ThemeResource TitleTextBlockStyle}"/>
+                                <StackPanel Orientation="Vertical"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind Path=DisplayName}"
+                                               Style="{ThemeResource BodyTextBlockStyle}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <!-- TEST DATA -->
+                    <ListViewItem x:Name="TEMPITEM"
+                                  Background="Red"/>
 
+                </ListView>
+
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="0,24,0,0">
+                    <Button x:Name="btnDeviceBack"
+                            Content="Back" 
+                            Width="128"
+                            Margin="8"/>
+                </StackPanel>
+            </StackPanel>
+            <!-- END OF SELECT DEVICE -->
+            
+            
+            <!-- Warping successfull -->
+            <StackPanel x:Name="spWarpingSuccess"
+                        Visibility="Collapsed">
+                <TextBlock Text="&#xE081;"
+                           FontFamily="Segoe MDL2 Assets"
+                           HorizontalAlignment="Center"
+                           Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                <TextBlock Text="Warping complete!" 
+                           Margin="0,12"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+            
+            
+            
             
             
         </StackPanel>
 
-        
+        <!-- Warping panel -->
+        <StackPanel x:Name="gridWarping"
+                    Canvas.ZIndex="10"
+                    VerticalAlignment="Center">
+            <TextBlock Text="Warping..."
+                       Canvas.ZIndex="20"
+                       Style="{ThemeResource HeaderTextBlockStyle}"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Top"
+                       Margin="8,8,8,64"/>
+
+            <ProgressRing IsActive="True"
+                          Height="72"
+                          Width="72" />
+
+            <Button x:Name="btnWarpCancel"
+                    Canvas.ZIndex="20"
+                    Content="Cancel" 
+                    Width="128"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="8,128,8,8" />
+        </StackPanel>
+        <!-- END OF WARPING GRID -->
+
+
     </Grid>
 </Page>
