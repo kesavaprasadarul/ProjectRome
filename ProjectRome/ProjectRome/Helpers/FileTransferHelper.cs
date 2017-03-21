@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
@@ -15,23 +17,71 @@ using Windows.UI.Xaml;
 
 namespace ProjectRome.Helpers
 {
-    public class FileTransferHelper
+    public class FileTransferHelper : INotifyPropertyChanged
     {
         public const int pingPort = 8081;
         public const int powerPort = 8083; //Transfer Port
         public const int bufferSize = 65536; //in bytes
-        public int transferProgress = 0; //Maximum is 100;
         StreamSocketListener listener;
         StreamSocketListener pListener;
         StreamSocket transferSocket;
         //StreamSocketInformation remoteHost;
         public HostName remoteHostInfo;
         public uint filenameLength;
-        public string originalFilename;
         public ulong fileLength;
         public long streamSize = 0;
         public long streamPosition = 0;
         public DataReader rw;
+
+        public FileTransferHelper()
+        {
+            
+        }
+
+        #region TransferPropertiesStrings
+        private string _originalFilename;
+        private int _fileSize; //in MB
+        private int _transferProgress; //100 is max
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string originalFilename
+        {
+            get { return _originalFilename; }
+            set { _originalFilename = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public int fileSize
+        {
+            get { return _fileSize; }
+            set { _fileSize = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public int transferProgress
+        {
+            get { return _transferProgress; }
+            set { _transferProgress = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        #endregion
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+
+            CoreDispatcher dispatcher = Application.Current.Resources.Dispatcher;
+            var x = dispatcher.HasThreadAccess;
+            Application.Current.Resources.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName)); }).AsTask().Wait();
+            
+        }
+
+
+
+
         public async Task<bool> initTransferListener()
         {
             try
@@ -78,12 +128,12 @@ namespace ProjectRome.Helpers
 
         private void convertToPercents(ulong current, ulong actual)
         {
-            transferProgress = (Convert.ToInt16(current / actual)) * 100;
+            transferProgress = (Convert.ToInt16(current*100 / actual));
         }
 
         private void convertToPercents(Int64 current, Int64 actual)
         {
-            transferProgress = (Convert.ToInt16(current / actual)) * 100;
+            transferProgress = (Convert.ToInt16(current*100 / actual));
         }
 
 
@@ -145,14 +195,11 @@ namespace ProjectRome.Helpers
                 fileStream.Position = Convert.ToInt64(streamPosition);
                 long memAlloc = streamSize - streamPosition < bufferSize ? streamSize - streamPosition : bufferSize;
                 byte[] buffer = new byte[memAlloc];
-                while (rw.UnconsumedBufferLength < memAlloc)
-                {
                     var lenToRead = memAlloc;
                     await rw.LoadAsync((uint)lenToRead);                    
                     rw.ReadBytes(buffer);
                     fileStream.Write(buffer, 0, buffer.Length);
-                    streamPosition += fileStream.Length;
-                }                
+                    streamPosition += buffer.Length;              
                 convertToPercents(streamPosition, streamSize);
                 GC.Collect();
             }
@@ -187,7 +234,8 @@ namespace ProjectRome.Helpers
                 switch (type)
                 {
                     case PickerType.Open:
-                        var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
+                    var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
+                    
                         pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
                         pickerO.FileTypeFilter.Add("*");
                     await Application.Current.Resources.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
