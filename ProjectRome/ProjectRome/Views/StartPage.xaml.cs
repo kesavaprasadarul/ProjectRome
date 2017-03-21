@@ -96,10 +96,10 @@ namespace ProjectRome.Views
                 case PickerType.Save:
                     var pickerS = new Windows.Storage.Pickers.FileSavePicker();
                     pickerS.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
-                    pickerS.FileTypeChoices.Add("file", new List<string> { ".pptx"});                    
+                    pickerS.FileTypeChoices.Add(extension, new List<string> { "."+extension});                    
                     pickerS.SuggestedFileName = name;
-                    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => { file = await pickerS.PickSaveFileAsync(); });
-                   // file = await pickerS.PickSaveFileAsync();
+                    // this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { file =  pickerS.PickSaveFileAsync(); });
+                   file = await pickerS.PickSaveFileAsync();
 
 
                     break;
@@ -110,9 +110,16 @@ namespace ProjectRome.Views
 
         private async void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
+          StorageFile filex = null;
           await helper.getPayloadInfo(args.Socket);
-            var file = await getFileLocationAsync(Views.PickerType.Save, helper.originalFilename, (helper.originalFilename.Split('.')).Last());
-             await  helper.getPayload(args.Socket,file);
+         await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => {
+                filex = await getFileLocationAsync(Views.PickerType.Save, helper.originalFilename, (helper.originalFilename.Split('.')).Last());
+                if (filex != null)
+                    await helper.getPayload(args.Socket, filex);
+                await new Windows.UI.Popups.MessageDialog("Done").ShowAsync();
+            });
+        //  var file = await getFileLocationAsync(Views.PickerType.Save, helper.originalFilename, (helper.originalFilename.Split('.')).Last());
+            
         }
 
         private void PListener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)

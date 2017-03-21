@@ -76,10 +76,16 @@ namespace ProjectRome.Helpers
             
         }
 
+        private void convertToPercents(ulong current, ulong actual)
+        {
+            transferProgress = (Convert.ToInt16(current / actual)) * 100;
+        }
+
         private void convertToPercents(Int64 current, Int64 actual)
         {
             transferProgress = (Convert.ToInt16(current / actual)) * 100;
         }
+
 
         public async void sendPayload(StorageFile file)
         {
@@ -137,18 +143,18 @@ namespace ProjectRome.Helpers
             while (streamPosition < streamSize)
             {
                 fileStream.Position = Convert.ToInt64(streamPosition);
-                long memAlloc = streamSize - streamPosition < 65536 ? streamSize - streamPosition : 65536;
+                long memAlloc = streamSize - streamPosition < bufferSize ? streamSize - streamPosition : bufferSize;
                 byte[] buffer = new byte[memAlloc];
                 while (rw.UnconsumedBufferLength < memAlloc)
                 {
                     var lenToRead = memAlloc;
-                    await rw.LoadAsync((uint)lenToRead);
-                    var tempBuff = rw.ReadBuffer((uint)lenToRead);
+                    await rw.LoadAsync((uint)lenToRead);                    
+                    rw.ReadBytes(buffer);
                     fileStream.Write(buffer, 0, buffer.Length);
                     streamPosition += fileStream.Length;
-                }
-                GC.Collect();
+                }                
                 convertToPercents(streamPosition, streamSize);
+                GC.Collect();
             }
             rw.DetachStream();
             rw.Dispose();
@@ -156,8 +162,8 @@ namespace ProjectRome.Helpers
 
         public async Task getPayloadInfo (StreamSocket socket)
         {
-            long streamSize = 0;
-            long streamPosition = 0;
+            streamSize = 0;
+            streamPosition = 0;            
             rw = new DataReader(socket.InputStream);
             {
                 // 1. Read the filename length
