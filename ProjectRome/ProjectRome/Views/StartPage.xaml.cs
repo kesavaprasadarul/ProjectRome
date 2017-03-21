@@ -192,7 +192,7 @@ namespace ProjectRome.Views
             AppServiceConnection connection = new AppServiceConnection
             {
                 AppServiceName = "com.warpzone.inventory",
-                PackageFamilyName = "dd4ba9a3-acd0-42cf-8bdd-134c36e80ed2_drfpcsz9zq1kw"
+                PackageFamilyName = "dd4ba9a3-acd0-42cf-8bdd-134c36e80ed2_gzkz8cyssw602"
             };
             if (remotesys == null)
             {
