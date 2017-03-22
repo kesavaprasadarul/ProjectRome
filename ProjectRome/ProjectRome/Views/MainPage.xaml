@@ -26,13 +26,21 @@
 
         </Storyboard>
         
+        <!-- Hide Storyboards -->
+        <Storyboard x:Name="sbHideTypeSelection"
+                    Completed="sbHideTypeSelection_Completed">
+            <DrillOutThemeAnimation Storyboard.TargetName="spSelectType"
+                                   Storyboard.TargetProperty="(StackPanel.Visibility)"
+                                   />
+        </Storyboard>
+        
         
         
     </Page.Resources>
     
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <!-- TODO: Inset Blurfetish -->
+        <!-- TODO: Insert Blurfetish -->
         
         <!-- TODO: Insert cool background warping animation -->
         <Grid x:Name="gridWarpBgAni"
@@ -65,9 +73,16 @@
 
             <!-- Initial Select Type -->
             <StackPanel x:Name="spSelectType"
-                        Orientation="Horizontal"
-                        Visibility="Collapsed">
+                        Orientation="Vertical"
+                        Visibility="Visible">
+                <TextBlock x:Name="tblTypeTitle"
+                           Text="Warp a..."
+                           FontWeight="Bold"
+                           Style="{ThemeResource HeaderTextBlockStyle}"
+                           HorizontalAlignment="Center"
+                           Margin="12,12,12,48"/>
 
+                <StackPanel Orientation="Horizontal">
                     <!-- Link -->
                     <Button x:Name="btnLink"
                             Margin="8,0"
@@ -147,6 +162,7 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
+                </StackPanel>                    
             </StackPanel>
             <!-- END OF INITIAL SELECT TYPE -->
 
@@ -154,6 +170,12 @@
             <!-- Select Link -->
             <StackPanel x:Name="spSelectLink"
                         Visibility="Collapsed">
+                <TextBlock x:Name="tblLinkTitle"
+                           Text="Select a link..."
+                           FontWeight="Bold"
+                           Style="{ThemeResource HeaderTextBlockStyle}"
+                           HorizontalAlignment="Center"
+                           Margin="12,12,12,48"/>
                 <!-- TODO - Make a custom style for this so it won't go white in Dark-theme -->
                 <TextBox x:Name="txtLink"
                          PlaceholderText="Enter an URL"
@@ -193,6 +215,12 @@
             <!-- Select device -->
             <StackPanel x:Name="spSelectDevice"
                         Visibility="Collapsed">
+                <TextBlock x:Name="tblDeviceTitle"
+                           Text="Warp to..."
+                           FontWeight="Bold"
+                           Style="{ThemeResource HeaderTextBlockStyle}"
+                           HorizontalAlignment="Center"
+                           Margin="12,12,12,48"/>
                 <ListView x:Name="lvDevices"
                           IsItemClickEnabled="True"
                           SelectionMode="None">
@@ -251,6 +279,7 @@
         <!-- Warping panel -->
         <StackPanel x:Name="gridWarping"
                     Canvas.ZIndex="10"
+                    Visibility="Collapsed"
                     VerticalAlignment="Center">
             <TextBlock Text="Warping..."
                        Canvas.ZIndex="20"
