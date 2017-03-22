@@ -34,6 +34,7 @@ using System.Collections.ObjectModel;
 using Windows.System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Windows.UI.ViewManagement;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -55,7 +56,6 @@ namespace ProjectRome.Views
         StreamSocketListener listener;
         StreamSocketListener pListener;
         StreamSocket transferSocket;
-        //StreamSocketInformation remoteHost;
         public HostName remoteHostInfo;
         public uint filenameLength;
         public ulong fileLength;
@@ -63,6 +63,8 @@ namespace ProjectRome.Views
         public long streamPosition = 0;
         public DataReader rw;
         public payloadType type;
+        public StorageFile shareFile = null;
+        public List<int> StackIndex =new List<int>();
         public ObservableCollection<RemoteSystem> RemoteSystems
         {
             get { return _RemoteSystems; }
@@ -80,13 +82,27 @@ namespace ProjectRome.Views
             listener.BindServiceNameAsync(powerPort.ToString()).AsTask().Wait();
             this.SizeChanged += StartPage_SizeChanged;
             StartPage_SizeChanged(this, null);
-            pListener = new StreamSocketListener();
-            pListener.ConnectionReceived += PListener_ConnectionReceived;
-            pListener.BindServiceNameAsync(pingPort.ToString()).AsTask().Wait();
             loadingVisible = Visibility.Collapsed;
             mainPresenter.Loaded += MainPresenter_Loaded;
+            ApplicationView.GetForCurrentView().VisibleBoundsChanged += (s, e) => { StartPage_SizeChanged(this, null); };
+            SystemNavigationManager.GetForCurrentView().BackRequested += StartPage_BackRequested;
             ////End Test
             initProjectRomeAPI();
+        }
+
+        private void StartPage_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            if(StackIndex.Count!=0)
+            {
+                ScrollToIndex(mainPresenter, StackIndex.Last(), 0, true);
+                StackIndex.Remove(StackIndex.Last());
+                e.Handled = true;
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
         }
 
         private void MainPresenter_Loaded(object sender, RoutedEventArgs ex)
@@ -95,13 +111,13 @@ namespace ProjectRome.Views
             scrollViewer.KeyDown += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
             scrollViewer.KeyUp += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
 
-
         }
 
         private void StartPage_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            var bounds = Window.Current.Bounds;
-            windowHeight = bounds.Height;
+        {            
+            var height = Window.Current.Bounds;
+            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;   
+            windowHeight = bounds.Height+ ApplicationView.GetForCurrentView().VisibleBounds.Top;
         }
 
         public async Task<StorageFile> getFileLocationAsync(PickerType type, string name, string extension = "txt")
@@ -121,14 +137,20 @@ namespace ProjectRome.Views
                     pickerS.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
                     pickerS.FileTypeChoices.Add(extension, new List<string> { "."+extension});                    
                     pickerS.SuggestedFileName = name;
-                    // this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => { file =  pickerS.PickSaveFileAsync(); });
                    file = await pickerS.PickSaveFileAsync();
-
-
                     break;
             }
 
             return file;
+        }
+
+        private void returnToMain()
+        {
+            var timer = new DispatcherTimer();
+            timer.Tick += (s, ex) => { ScrollToIndex(mainPresenter,0,0,true); (s as DispatcherTimer).Stop(); };
+            StackIndex.Clear();
+            timer.Interval = new TimeSpan(0, 0, 3);
+            timer.Start();
         }
 
         private async void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
@@ -136,22 +158,15 @@ namespace ProjectRome.Views
             await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () =>
             {
                 await getPayloadInfo(args.Socket);
-                //originalFilename = "Text.txt";
+                ScrollToIndex(mainPresenter, 3,1);
                 var filex = await getFileLocationAsync(Views.PickerType.Save, originalFilename, (originalFilename.Split('.')).Last());
                 if (filex != null)
                     await getPayload(args.Socket, filex);
-                await new Windows.UI.Popups.MessageDialog("Done").ShowAsync();
+                args.Socket.Dispose();
+                returnToMain();
             });
 
-        //  var file = await getFileLocationAsync(Views.PickerType.Save, helper.originalFilename, (helper.originalFilename.Split('.')).Last());
             
-        }
-
-        private void PListener_ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
-        {
-            remoteHostInfo = args.Socket.Information.LocalAddress;
-            //Forward to send function
-            sendPayload(null);
         }
 
         public async void initProjectRomeAPI()
@@ -176,13 +191,6 @@ namespace ProjectRome.Views
            
         }
 
-        private async void sendBtn_Click(object sender, RoutedEventArgs e)
-        {
-            ////Send Project Rome request
-            
-        }
-
-
         public string getLocalIP()
         {
             var x = NetworkInformation.GetHostNames().Single(r => r.Type == HostNameType.Ipv4);
@@ -194,11 +202,17 @@ namespace ProjectRome.Views
             SelectedRemoteSystem = ((ListView)sender).SelectedItem as RemoteSystem;
             if (type == payloadType.File)
             {
-                var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
-                pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
-                pickerO.FileTypeFilter.Add("*");
-                var file = await pickerO.PickSingleFileAsync();
-                ScrollToIndex(mainPresenter, 3);
+                StorageFile file;
+                if (shareFile == null)
+                {
+                    var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
+                    pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+                    pickerO.FileTypeFilter.Add("*");
+                    file = await pickerO.PickSingleFileAsync();
+                }
+
+                else file = shareFile;                
+                ScrollToIndex(mainPresenter, 3,2);
                 if (SelectedRemoteSystem != null && file != null)
                 {
                     ValueSet data = new ValueSet()
@@ -210,9 +224,22 @@ namespace ProjectRome.Views
                     var response = await sendAppServiceRequest(SelectedRemoteSystem, data);
                     var x = response["receiveIP"] as string;
                     remoteHostInfo = new HostName(x);
-                    sendPayload(file);
+                    await sendPayload(file);
+                    returnToMain();
+
                 }
             }
+            else if(type== payloadType.Link)
+            {
+                var link = addressBar.Text;
+                if (SelectedRemoteSystem != null)
+                    if (await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(SelectedRemoteSystem), new Uri(link)) == RemoteLaunchUriStatus.Success)
+                        returnToMain();
+                    else await (new Windows.UI.Popups.MessageDialog("Error")).ShowAsync();
+            }
+            remoteSystemList.SelectionChanged -= ListBox_SelectionChanged;
+            remoteSystemList.SelectedIndex = -1;
+            remoteSystemList.SelectionChanged += ListBox_SelectionChanged;
         }
 
         private async Task<ValueSet> sendAppServiceRequest(RemoteSystem remotesys, ValueSet props)
@@ -238,13 +265,13 @@ namespace ProjectRome.Views
 
         private async void sendLinkBtn_Click(object sender, RoutedEventArgs e)
         {
-            
+
             //var link = addressBar.Text;
             //var rSystem = remoteSystemList.SelectedItem as RemoteSystem;
-            //if(rSystem != null)
-            //await RemoteLauncher.LaunchUriAsync(
-            //        new RemoteSystemConnectionRequest(rSystem),
-            //        new Uri(link));
+            //if (rSystem != null)
+            //    await RemoteLauncher.LaunchUriAsync(
+            //            new RemoteSystemConnectionRequest(rSystem),
+            //            new Uri(link));
         }
 
         #region PropertyValues
@@ -314,8 +341,10 @@ namespace ProjectRome.Views
             }
         }
 
-        private void ScrollToIndex(ListViewBase listViewBase, int index)
+        private void ScrollToIndex(ListViewBase listViewBase, int index, int currentIndex, bool isBack=false)
         {
+            if(!isBack)
+            StackIndex.Add(currentIndex);
             bool isVirtualizing = default(bool);
             double previousHorizontalOffset = default(double), previousVerticalOffset = default(double);
 
@@ -399,7 +428,7 @@ namespace ProjectRome.Views
         }
 
 
-        public async void sendPayload(StorageFile file)
+        public async Task sendPayload(StorageFile file)
         {
             if (file == null)
                 file = await getFileLocationAsync(PickerType.Open, "", "");
@@ -490,11 +519,21 @@ namespace ProjectRome.Views
         }
         #endregion
 
-        private async void sendNavbtn_Click(object sender, RoutedEventArgs e)
+        private void sendFileNavbtn_Click(object sender, RoutedEventArgs e)
         {
-            ScrollToIndex(mainPresenter, 2);
+            ScrollToIndex(mainPresenter, 2,0);
             type = payloadType.File;
-            //mainPresenter.ScrollIntoView(mainPresenter.Items[1]);
+       }
+
+        private void sendLinkbtn_Click_1(object sender, RoutedEventArgs e)
+        {
+            ScrollToIndex(mainPresenter, 1, 0);
+            type = payloadType.Link;
+        }
+
+        private void warpLinkBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ScrollToIndex(mainPresenter, 2, 1);
         }
     }
 

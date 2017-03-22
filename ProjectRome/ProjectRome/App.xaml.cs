@@ -100,21 +100,6 @@ namespace ProjectRome
             {
                 var toastArgs = args as ToastNotificationActivatedEventArgs;
                 var arguments = toastArgs.Argument;
-
-                if (arguments == "check")
-                {
-                    Frame rootFrameX = Window.Current.Content as Frame;
-                    if (rootFrameX == null)
-                    {
-                        rootFrameX = new Frame();
-                        Window.Current.Content = rootFrameX;
-                    }
-                    if (rootFrameX.Content.GetType() != typeof(Views.StartPage))
-                    {
-                        rootFrameX.Navigate(typeof(Views.StartPage));
-                        Window.Current.Activate();
-                    }
-                }
             }
 
             if (args.Kind == ActivationKind.Protocol)

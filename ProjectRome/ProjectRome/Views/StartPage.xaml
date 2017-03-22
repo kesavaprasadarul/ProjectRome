@@ -63,7 +63,7 @@
                     <StackPanel>
                     <TextBlock Text="SEND" FontWeight="SemiBold" Margin="0,0,0,12" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                     <StackPanel Orientation="Horizontal">
-                        <Button Margin="8,0" x:Name="sendNavbtn" Click="sendNavbtn_Click">
+                            <Button Margin="8,0" x:Name="sendFilebtn" Click="sendFileNavbtn_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <StackPanel>
@@ -77,7 +77,7 @@
                             </Button.Template>
                         </Button>
                         
-                        <Button Margin="8,0" x:Name="sendLinkbtn" Click="sendNavbtn_Click">
+                        <Button Margin="8,0" x:Name="sendLinkbtn" Click="sendLinkbtn_Click_1">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <StackPanel>
@@ -99,11 +99,13 @@
                 <Grid x:Name="fileTranferBlk">
                     
                 </Grid>
-                <Grid x:Name="linkWarpBlk">
-                    <TextBox VerticalAlignment="Center" 
+                <StackPanel x:Name="linkWarpBlk">
+                    <TextBox MinWidth="250"
+                             VerticalAlignment="Center" 
                              HorizontalAlignment="Center"
                              x:Name="addressBar"/>
-                </Grid>
+                        <Button x:Name="warpLinkBtn" Click="warpLinkBtn_Click" Content="Warp Link" HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </Grid>
             </ListViewItem>
             <ListViewItem  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource AppBarBackground}">
@@ -122,8 +124,7 @@
             <ListViewItem HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource AppBarBackground}">
                 <Grid>
                     <Grid x:Name="fileTransferStatusBlk">
-                        <TextBlock Text="RECEIVING" FontWeight="SemiBold" VerticalAlignment="Top" Margin="0,0,0,36" HorizontalAlignment="Center"/>
-                        <locals:CircularProgressBar Radius="96" StrokeThickness="2" SegmentColor="{ThemeResource SystemControlBackgroundAccentBrush}"  Percentage="{x:Bind transferProgress, Mode=OneWay}" />
+                        <locals:CircularProgressBar Radius="120" StrokeThickness="2" SegmentColor="{ThemeResource SystemControlBackgroundAccentBrush}"  Percentage="{x:Bind transferProgress, Mode=OneWay}" />
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                             <TextBlock x:Name="fileNameTb" HorizontalAlignment="Center" Text="{x:Bind originalFilename, Mode=OneWay}" FontWeight="SemiBold"/>
                             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
