@@ -20,12 +20,20 @@ namespace ProjectRome.Views
         public MainPage()
         {
             this.InitializeComponent();
-            sbWarpBackgroundAnimation.Begin();
+            //sbWarpBackgroundAnimation.Begin();
         }
 
         private void btnLink_Click(object sender, RoutedEventArgs e)
         {
+            Frame.Navigate(typeof(Views.LinkPage));
+        }
 
+        private void sbHideTypeSelection_Completed(object sender, object e)
+        {
+            //spSelectType.Visibility = Visibility.Collapsed;
+
+            // TEMP
+            //spSelectLink.Visibility = Visibility.Visible;
         }
     }
 }
