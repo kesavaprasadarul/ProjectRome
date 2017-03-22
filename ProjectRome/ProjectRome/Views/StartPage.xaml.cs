@@ -115,14 +115,16 @@ namespace ProjectRome.Views
 
         private async void OnConnectionAsync(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
         {
-          StorageFile filex = null;
-          await getPayloadInfo(args.Socket);
-         await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () => {
-                filex = await getFileLocationAsync(Views.PickerType.Save, originalFilename, (originalFilename.Split('.')).Last());
+            await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () =>
+            {
+                await getPayloadInfo(args.Socket);
+                //originalFilename = "Text.txt";
+                var filex = await getFileLocationAsync(Views.PickerType.Save, originalFilename, (originalFilename.Split('.')).Last());
                 if (filex != null)
                     await getPayload(args.Socket, filex);
                 await new Windows.UI.Popups.MessageDialog("Done").ShowAsync();
             });
+
         //  var file = await getFileLocationAsync(Views.PickerType.Save, helper.originalFilename, (helper.originalFilename.Split('.')).Last());
             
         }
@@ -225,7 +227,7 @@ namespace ProjectRome.Views
         private string _originalFilename;
         private int _fileSize; //in MB
         private double _transferProgress; //100 is max
-
+        private string _sizeProgress;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string originalFilename
@@ -258,6 +260,16 @@ namespace ProjectRome.Views
             }
         }
 
+        public string sizeProgress
+        {
+            get { return _sizeProgress; }
+            set
+            {
+                _sizeProgress = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -270,11 +282,13 @@ namespace ProjectRome.Views
         private void convertToPercents(ulong current, ulong actual)
         {
             transferProgress = (current*100 / actual);
+            sizeProgress = string.Format("{0} MB/ {1} MB", (current / 1048576).ToString(), (actual / 1048576).ToString());
         }
 
         private void convertToPercents(Int64 current, Int64 actual)
         {
             transferProgress = (current*100/ actual);
+            sizeProgress = string.Format("{0} MB/ {1} MB", (current / 1048576).ToString(), (actual / 1048576).ToString());
         }
 
 
@@ -354,7 +368,6 @@ namespace ProjectRome.Views
             streamSize = 0;
             streamPosition = 0;
             rw = new DataReader(socket.InputStream);
-            {
                 // 1. Read the filename length
                 await rw.LoadAsync(sizeof(Int32));
                 filenameLength = (uint)rw.ReadInt32();
@@ -365,8 +378,6 @@ namespace ProjectRome.Views
                 await rw.LoadAsync(sizeof(UInt64));
                 fileLength = rw.ReadUInt64();
                 //var file = await Views.StartPage.getFileLocationAsync(Views.PickerType.Save, originalFilename, (originalFilename.Split('.')).Last());
-
-            }
         }
         #endregion
     }

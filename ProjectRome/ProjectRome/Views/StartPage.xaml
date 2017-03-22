@@ -15,7 +15,11 @@
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">        
             <!--<Button x:Name="sendBtn" Content="Send" Click="sendBtn_Click"/>-->
             <TextBlock x:Name="fileNameTb" HorizontalAlignment="Center" Text="{x:Bind originalFilename, Mode=OneWay}" FontWeight="SemiBold"/>
-            <TextBlock x:Name="percentageTb" HorizontalAlignment="Center" FontSize="48" Text="{x:Bind transferProgress, Mode=OneWay}" FontWeight="Light"/>
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock x:Name="percentageTb" HorizontalAlignment="Center" FontSize="48" Text="{x:Bind transferProgress, Mode=OneWay}" FontWeight="Light"/>
+                <TextBlock Text="%" FontSize="48" FontWeight="Light" VerticalAlignment="Bottom"/>                
+            </StackPanel>
+            <TextBlock Text="{x:Bind sizeProgress,Mode=TwoWay}" FontWeight="Light" HorizontalAlignment="Center" Foreground="{ThemeResource AppBarButtonForegroundDisabled}"/>
         </StackPanel>
         <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center">
             <TextBox x:Name="addressBar"/>
