@@ -269,12 +269,12 @@ namespace ProjectRome.Views
 
         private void convertToPercents(ulong current, ulong actual)
         {
-            transferProgress = (current / actual);
+            transferProgress = (current*100 / actual);
         }
 
         private void convertToPercents(Int64 current, Int64 actual)
         {
-            transferProgress = (current/ actual);
+            transferProgress = (current*100/ actual);
         }
 
 
@@ -282,6 +282,7 @@ namespace ProjectRome.Views
         {
             if (file == null)
                 file = await getFileLocationAsync(PickerType.Open, "", "");
+            originalFilename = file.DisplayName;
             transferSocket = new StreamSocket();
             transferSocket.Control.KeepAlive = false;
             if (remoteHostInfo != null)
