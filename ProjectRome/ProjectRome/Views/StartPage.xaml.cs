@@ -77,13 +77,20 @@ namespace ProjectRome.Views
             listener = new StreamSocketListener();
             listener.ConnectionReceived += OnConnectionAsync;
             listener.BindServiceNameAsync(powerPort.ToString()).AsTask().Wait();
-
+            this.SizeChanged += StartPage_SizeChanged;
+            StartPage_SizeChanged(this, null);
             pListener = new StreamSocketListener();
             pListener.ConnectionReceived += PListener_ConnectionReceived;
             pListener.BindServiceNameAsync(pingPort.ToString()).AsTask().Wait();
             loadingVisible = Visibility.Collapsed;
             ////End Test
             initProjectRomeAPI();
+        }
+
+        private void StartPage_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var bounds = Window.Current.Bounds;
+            windowHeight = bounds.Height;
         }
 
         public async Task<StorageFile> getFileLocationAsync(PickerType type, string name, string extension = "txt")
@@ -152,7 +159,7 @@ namespace ProjectRome.Views
         {
            await this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
             {
-                remoteSystemList.Items.Add(args.RemoteSystem);
+                //remoteSystemList.Items.Add(args.RemoteSystem);
                 
             });
            
@@ -216,7 +223,7 @@ namespace ProjectRome.Views
 
         private async void sendLinkBtn_Click(object sender, RoutedEventArgs e)
         {
-            FlyoutBase.ShowAttachedFlyout(appBarStack);
+            
             //var link = addressBar.Text;
             //var rSystem = remoteSystemList.SelectedItem as RemoteSystem;
             //if(rSystem != null)
@@ -225,7 +232,8 @@ namespace ProjectRome.Views
             //        new Uri(link));
         }
 
-        #region TransferPropertiesStrings
+        #region PropertyValues
+        private double _windowHeight;
         private string _originalFilename;
         private int _fileSize; //in MB
         private double _transferProgress; //100 is max
@@ -239,6 +247,14 @@ namespace ProjectRome.Views
             set
             {
                 _originalFilename = value;
+                NotifyPropertyChanged();
+            }
+        }
+
+        public double windowHeight
+        {
+            get { return _windowHeight; }
+            set { _windowHeight = value;
                 NotifyPropertyChanged();
             }
         }
@@ -395,6 +411,11 @@ namespace ProjectRome.Views
                 //var file = await Views.StartPage.getFileLocationAsync(Views.PickerType.Save, originalFilename, (originalFilename.Split('.')).Last());
         }
         #endregion
+
+        private void sendNavbtn_Click(object sender, RoutedEventArgs e)
+        {
+            mainPresenter.ScrollIntoView(mainPresenter.Items[1]);
+        }
     }
 
     public enum PickerType
