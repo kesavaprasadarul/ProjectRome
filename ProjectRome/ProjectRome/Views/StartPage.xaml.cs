@@ -62,6 +62,7 @@ namespace ProjectRome.Views
         public long streamSize = 0;
         public long streamPosition = 0;
         public DataReader rw;
+        public payloadType type;
         public ObservableCollection<RemoteSystem> RemoteSystems
         {
             get { return _RemoteSystems; }
@@ -83,8 +84,18 @@ namespace ProjectRome.Views
             pListener.ConnectionReceived += PListener_ConnectionReceived;
             pListener.BindServiceNameAsync(pingPort.ToString()).AsTask().Wait();
             loadingVisible = Visibility.Collapsed;
+            mainPresenter.Loaded += MainPresenter_Loaded;
             ////End Test
             initProjectRomeAPI();
+        }
+
+        private void MainPresenter_Loaded(object sender, RoutedEventArgs ex)
+        {
+            var scrollViewer = GetScrollViewer(mainPresenter as ListViewBase);
+            scrollViewer.KeyDown += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
+            scrollViewer.KeyUp += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
+
+
         }
 
         private void StartPage_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -159,7 +170,7 @@ namespace ProjectRome.Views
         {
            await this.Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
             {
-                //remoteSystemList.Items.Add(args.RemoteSystem);
+                remoteSystemList.Items.Add(args.RemoteSystem);
                 
             });
            
@@ -168,24 +179,7 @@ namespace ProjectRome.Views
         private async void sendBtn_Click(object sender, RoutedEventArgs e)
         {
             ////Send Project Rome request
-            var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
-            pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
-            pickerO.FileTypeFilter.Add("*");
-            var file = await pickerO.PickSingleFileAsync();
-            if (SelectedRemoteSystem!=null && file!=null)
-            {
-                ValueSet data = new ValueSet()
-                {
-                    {"host", getLocalIP() },
-                    {"type","fileTransfer" },
-                    {"file",file.Name }
-                };
-                var response = await sendAppServiceRequest(SelectedRemoteSystem, data);
-                var x = response["receiveIP"] as string;
-                remoteHostInfo = new HostName(x);
-                sendPayload(file);
-            }
-
+            
         }
 
 
@@ -198,6 +192,27 @@ namespace ProjectRome.Views
         private async void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SelectedRemoteSystem = ((ListView)sender).SelectedItem as RemoteSystem;
+            if (type == payloadType.File)
+            {
+                var pickerO = new Windows.Storage.Pickers.FileOpenPicker();
+                pickerO.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+                pickerO.FileTypeFilter.Add("*");
+                var file = await pickerO.PickSingleFileAsync();
+                ScrollToIndex(mainPresenter, 3);
+                if (SelectedRemoteSystem != null && file != null)
+                {
+                    ValueSet data = new ValueSet()
+                {
+                    {"host", getLocalIP() },
+                    {"type","fileTransfer" },
+                    {"file",file.Name }
+                };
+                    var response = await sendAppServiceRequest(SelectedRemoteSystem, data);
+                    var x = response["receiveIP"] as string;
+                    remoteHostInfo = new HostName(x);
+                    sendPayload(file);
+                }
+            }
         }
 
         private async Task<ValueSet> sendAppServiceRequest(RemoteSystem remotesys, ValueSet props)
@@ -297,6 +312,69 @@ namespace ProjectRome.Views
                 _loadingVisible = value;
                 NotifyPropertyChanged();
             }
+        }
+
+        private void ScrollToIndex(ListViewBase listViewBase, int index)
+        {
+            bool isVirtualizing = default(bool);
+            double previousHorizontalOffset = default(double), previousVerticalOffset = default(double);
+
+            // get the ScrollViewer withtin the ListView/GridView
+            var scrollViewer = GetScrollViewer(listViewBase);
+            // get the SelectorItem to scroll to
+            var selectorItem = listViewBase.ContainerFromIndex(index) as SelectorItem;
+
+            // when it's null, means virtualization is on and the item hasn't been realized yet
+            if (selectorItem == null)
+            {
+                isVirtualizing = true;
+
+                previousHorizontalOffset = scrollViewer.HorizontalOffset;
+                previousVerticalOffset = scrollViewer.VerticalOffset;
+
+                // call task-based ScrollIntoViewAsync to realize the item
+                listViewBase.ScrollIntoView(listViewBase.Items[index]);
+
+                // this time the item shouldn't be null again
+                selectorItem = (SelectorItem)listViewBase.ContainerFromIndex(index);
+            }
+
+            // calculate the position object in order to know how much to scroll to
+            var transform = selectorItem.TransformToVisual((UIElement)scrollViewer.Content);
+            var position = transform.TransformPoint(new Point(0, 0));
+            // when virtualized, scroll back to previous position without animation
+            if (isVirtualizing)
+            {
+                scrollViewer.ChangeView(previousHorizontalOffset, previousVerticalOffset, 1);
+            }
+            scrollViewer.IsFocusEngaged = false;
+            // scroll to desired position with animation!
+            scrollViewer.ChangeView(position.X, position.Y, null);
+        }
+
+        private ScrollViewer GetScrollViewer( DependencyObject element)
+        {
+            if (element is ScrollViewer)
+            {
+                return (ScrollViewer)element;
+            }
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+            {
+                var child = VisualTreeHelper.GetChild(element, i);
+
+                var result = GetScrollViewer(child);
+                if (result == null)
+                {
+                    continue;
+                }
+                else
+                {
+                    return result;
+                }
+            }
+
+            return null;
         }
 
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
@@ -412,15 +490,25 @@ namespace ProjectRome.Views
         }
         #endregion
 
-        private void sendNavbtn_Click(object sender, RoutedEventArgs e)
+        private async void sendNavbtn_Click(object sender, RoutedEventArgs e)
         {
-            mainPresenter.ScrollIntoView(mainPresenter.Items[1]);
+            ScrollToIndex(mainPresenter, 2);
+            type = payloadType.File;
+            //mainPresenter.ScrollIntoView(mainPresenter.Items[1]);
         }
     }
+
 
     public enum PickerType
     {
         Open,
         Save
+    }
+
+    public enum payloadType
+    {
+        File,
+        Link,
+        Clipboard
     }
 }

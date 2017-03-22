@@ -10,8 +10,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        
         <!--<Grid.RowDefinitions >
             <RowDefinition Height="3*"/>
             <RowDefinition Height="1*"/>
@@ -49,32 +49,66 @@
         </Grid>
         --><!--<locals:BackDrop Background="{ThemeResource InkToolbarAccentColorThemeBrush}" Visibility="{x:Bind loadingVisible,Mode=OneWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>--><!--
         <TextBlock Grid.RowSpan="2" Text="CONNECTING" Visibility="{x:Bind loadingVisible,Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>-->
-        <ListView x:Name="mainPresenter" SelectionMode="None" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.HorizontalScrollMode="Disabled">
+        <ListView x:Name="mainPresenter" 
+                  IsTabStop="False" 
+                  ShowsScrollingPlaceholders="False"
+                  SelectionMode="None" 
+                  ScrollViewer.BringIntoViewOnFocusChange="False"
+                  ScrollViewer.IsVerticalRailEnabled="False"
+                  ScrollViewer.ZoomMode="Disabled"
+                  ScrollViewer.VerticalScrollMode="Disabled"
+                  ScrollViewer.HorizontalScrollMode="Disabled">
             <ListViewItem HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource SystemControlBackgroundAccentBrush}">
                 <Grid>
                     <StackPanel>
-                        <Button x:Name="sendNavbtn" Click="sendNavbtn_Click">
-                        <TextBlock Text="Send Files"/>
-                    </Button>
-                        <Button>
-                            <TextBlock Text="Send Link"/>
+                    <TextBlock Text="SEND" FontWeight="SemiBold" Margin="0,0,0,12" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Margin="8,0" x:Name="sendNavbtn" Click="sendNavbtn_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Ellipse Height="64" Width="64" Fill="{ThemeResource AppBarButtonForegroundDisabled}"/>
+                                            <SymbolIcon Symbol="Attach"/>
+                                        </Grid>
+                                        <ContentPresenter FontWeight="Light" Content="FILE" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ControlTemplate>
+                            </Button.Template>
                         </Button>
+                        
+                        <Button Margin="8,0" x:Name="sendLinkbtn" Click="sendNavbtn_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Ellipse Height="64" Width="64" Fill="{ThemeResource AppBarButtonForegroundDisabled}"/>
+                                            <SymbolIcon Symbol="Link"/>
+                                        </Grid>
+                                            <ContentPresenter FontWeight="Light" Content="LINK" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
                     </StackPanel>
                 </Grid>
             </ListViewItem>
             <ListViewItem HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                 <Grid>
-                    <locals:CircularProgressBar Radius="96" StrokeThickness="2" SegmentColor="{ThemeResource SystemControlBackgroundAccentBrush}"  Percentage="{x:Bind transferProgress, Mode=OneWay}" />
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock x:Name="fileNameTb" HorizontalAlignment="Center" Text="{x:Bind originalFilename, Mode=OneWay}" FontWeight="SemiBold"/>
-                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                            <TextBlock x:Name="percentageTb" HorizontalAlignment="Center" Foreground="{ThemeResource SystemControlBackgroundAccentBrush}" FontSize="36" Text="{x:Bind transferProgress, Mode=OneWay}" FontWeight="Light"/>
-                            <TextBlock Text="%" Foreground="{ThemeResource SystemControlBackgroundAccentBrush}" FontSize="36" FontWeight="Light" VerticalAlignment="Bottom"/>
-                        </StackPanel>
-                        <TextBlock Text="{x:Bind sizeProgress,Mode=TwoWay}" FontWeight="Light" HorizontalAlignment="Center" Foreground="{ThemeResource AppBarButtonForegroundDisabled}"/>
-                    </StackPanel>
-                    <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                        <TextBox x:Name="addressBar"/>
+                <Grid x:Name="fileTranferBlk">
+                    
+                </Grid>
+                <Grid x:Name="linkWarpBlk">
+                    <TextBox VerticalAlignment="Center" 
+                             HorizontalAlignment="Center"
+                             x:Name="addressBar"/>
+                </Grid>
+                </Grid>
+            </ListViewItem>
+            <ListViewItem  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource AppBarBackground}">
+                <Grid>
+                    <Grid x:Name="deviceSelection">
                         <ListView x:Name="remoteSystemList" Margin="0,0,0,-48" SelectionChanged="ListBox_SelectionChanged">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="vmx:RemoteSystem">
@@ -82,14 +116,24 @@
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
             </ListViewItem>
-            <ListViewItem  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource AppBarBackground}">
-                <Grid/>
-            </ListViewItem>
             <ListViewItem HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" MinHeight="250" Height="{x:Bind windowHeight, Mode=OneWay}" Background="{ThemeResource AppBarBackground}">
-                <Grid/>
+                <Grid>
+                    <Grid x:Name="fileTransferStatusBlk">
+                        <TextBlock Text="RECEIVING" FontWeight="SemiBold" VerticalAlignment="Top" Margin="0,0,0,36" HorizontalAlignment="Center"/>
+                        <locals:CircularProgressBar Radius="96" StrokeThickness="2" SegmentColor="{ThemeResource SystemControlBackgroundAccentBrush}"  Percentage="{x:Bind transferProgress, Mode=OneWay}" />
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock x:Name="fileNameTb" HorizontalAlignment="Center" Text="{x:Bind originalFilename, Mode=OneWay}" FontWeight="SemiBold"/>
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock x:Name="percentageTb" HorizontalAlignment="Center" Foreground="{ThemeResource SystemControlBackgroundAccentBrush}" FontSize="36" Text="{x:Bind transferProgress, Mode=OneWay}" FontWeight="Light"/>
+                                <TextBlock Text="%" Foreground="{ThemeResource SystemControlBackgroundAccentBrush}" FontSize="36" FontWeight="Light" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind sizeProgress,Mode=TwoWay}" FontWeight="Light" HorizontalAlignment="Center" Foreground="{ThemeResource AppBarButtonForegroundDisabled}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
             </ListViewItem>
         </ListView>
         
