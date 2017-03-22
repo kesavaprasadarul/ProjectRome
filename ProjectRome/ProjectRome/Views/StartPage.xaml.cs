@@ -81,7 +81,7 @@ namespace ProjectRome.Views
             pListener = new StreamSocketListener();
             pListener.ConnectionReceived += PListener_ConnectionReceived;
             pListener.BindServiceNameAsync(pingPort.ToString()).AsTask().Wait();
-
+            loadingVisible = Visibility.Collapsed;
             ////End Test
             initProjectRomeAPI();
         }
@@ -216,11 +216,13 @@ namespace ProjectRome.Views
 
         private async void sendLinkBtn_Click(object sender, RoutedEventArgs e)
         {
-            var link = addressBar.Text;
-            if(SelectedRemoteSystem!=null)
-            await RemoteLauncher.LaunchUriAsync(
-                    new RemoteSystemConnectionRequest(SelectedRemoteSystem),
-                    new Uri(link));
+            FlyoutBase.ShowAttachedFlyout(appBarStack);
+            //var link = addressBar.Text;
+            //var rSystem = remoteSystemList.SelectedItem as RemoteSystem;
+            //if(rSystem != null)
+            //await RemoteLauncher.LaunchUriAsync(
+            //        new RemoteSystemConnectionRequest(rSystem),
+            //        new Uri(link));
         }
 
         #region TransferPropertiesStrings
@@ -228,6 +230,7 @@ namespace ProjectRome.Views
         private int _fileSize; //in MB
         private double _transferProgress; //100 is max
         private string _sizeProgress;
+        private Visibility _loadingVisible;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string originalFilename
@@ -270,6 +273,16 @@ namespace ProjectRome.Views
             }
         }
 
+        public Visibility loadingVisible
+        {
+            get { return _loadingVisible; }
+            set
+            {
+                _loadingVisible = value;
+                NotifyPropertyChanged();
+            }
+        }
+
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -301,6 +314,7 @@ namespace ProjectRome.Views
             transferSocket.Control.KeepAlive = false;
             if (remoteHostInfo != null)
             {
+                loadingVisible = Visibility.Visible;
                 await transferSocket.ConnectAsync(remoteHostInfo, powerPort.ToString());
                 long streamPosition = 0;
                 long streamSize = 0;
@@ -315,6 +329,7 @@ namespace ProjectRome.Views
                     // Send file size
                     dataWriter.WriteUInt64(properties.Size);
                     // Send the file
+                    loadingVisible = Visibility.Collapsed;
                     Stream fileStream = await file.OpenStreamForReadAsync();
                     streamSize = fileStream.Length;
                     while (streamPosition < streamSize)
