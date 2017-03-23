@@ -42,13 +42,15 @@
                 <Button x:Name="btnLinkBack"
                         Content="Back" 
                         Width="128"
-                        Margin="8"/>
+                        Margin="8"
+                        Click="btnLinkBack_Click"/>
                 <Button x:Name="btnLinkNext"
                         Background="{ThemeResource SystemControlBackgroundAccentBrush}"
                         RequestedTheme="Dark"
                         Content="Next"
                         Width="128"
-                        Margin="8"/>
+                        Margin="8"
+                        Click="btnLinkNext_Click"/>
             </StackPanel>
         </StackPanel>
         <!-- END OF SELECT LINK -->

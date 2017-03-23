@@ -11,7 +11,7 @@
 
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid.RowDefinitions >
+        <!--<Grid.RowDefinitions >
             <RowDefinition Height="3*"/>
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
@@ -21,7 +21,7 @@
         <Grid Grid.Row="0">
             <locals:CircularProgressBar Radius="96" StrokeThickness="2" SegmentColor="{ThemeResource SystemControlBackgroundAccentBrush}"  Percentage="{x:Bind transferProgress, Mode=OneWay}" />
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <!--<Button x:Name="sendBtn" Content="Send" Click="sendBtn_Click"/>-->
+                --><!--<Button x:Name="sendBtn" Content="Send" Click="sendBtn_Click"/>--><!--
                 <TextBlock x:Name="fileNameTb" HorizontalAlignment="Center" Text="{x:Bind originalFilename, Mode=OneWay}" FontWeight="SemiBold"/>
                 <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
                     <TextBlock x:Name="percentageTb" HorizontalAlignment="Center" Foreground="{ThemeResource SystemControlBackgroundAccentBrush}" FontSize="36" Text="{x:Bind transferProgress, Mode=OneWay}" FontWeight="Light"/>
@@ -47,8 +47,8 @@
                 </StackPanel>
             </AppBar>
         </Grid>
-        <!--<locals:BackDrop Background="{ThemeResource InkToolbarAccentColorThemeBrush}" Visibility="{x:Bind loadingVisible,Mode=OneWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>-->
-        <TextBlock Grid.RowSpan="2" Text="CONNECTING" Visibility="{x:Bind loadingVisible,Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        --><!--<locals:BackDrop Background="{ThemeResource InkToolbarAccentColorThemeBrush}" Visibility="{x:Bind loadingVisible,Mode=OneWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>--><!--
+        <TextBlock Grid.RowSpan="2" Text="CONNECTING" Visibility="{x:Bind loadingVisible,Mode=OneWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>-->
 
     </Grid>
 </Page>

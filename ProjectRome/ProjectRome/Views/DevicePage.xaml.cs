@@ -14,21 +14,21 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+
 namespace ProjectRome.Views
 {
-    public sealed partial class LinkPage : Page
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class DevicePage : Page
     {
-
-        public LinkPage()
+        public DevicePage()
         {
             this.InitializeComponent();
         }
 
-
-
-
-
-
+        // ### NAV-STUFF ###
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -78,15 +78,20 @@ namespace ProjectRome.Views
             Frame.GoBack();
             //Frame.Navigate(typeof(YOUR_PREVIOUS_PAGE_HERE));    // Manual override
         }
+        // ### END OF NAV-STUFF
 
-        private void btnLinkBack_Click(object sender, RoutedEventArgs e)
+
+
+
+        private void lvDevices_ItemClick(object sender, ItemClickEventArgs e)
         {
-            OnBackRequested();
+            // TODO Do stuff with the clicked item
+            Frame.Navigate(typeof(Views.WarpingPage));
         }
 
-        private void btnLinkNext_Click(object sender, RoutedEventArgs e)
+        private void btnDeviceBack_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(Views.DevicePage));
+            Frame.GoBack();
         }
     }
 }
