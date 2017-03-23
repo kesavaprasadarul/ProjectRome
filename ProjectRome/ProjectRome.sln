@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectRome", "ProjectRome\ProjectRome.csproj", "{CD077672-52EF-41F2-85B4-8C3309075EEF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{96BE3041-B232-4BFB-AB30-95A578BACE8E} = {96BE3041-B232-4BFB-AB30-95A578BACE8E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WarpzoneBackend", "WarpzoneBackend\WarpzoneBackend.csproj", "{96BE3041-B232-4BFB-AB30-95A578BACE8E}"
 EndProject
