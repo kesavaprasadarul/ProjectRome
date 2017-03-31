@@ -62,9 +62,12 @@ namespace ProjectRome.Views
         public long streamSize = 0;
         public long streamPosition = 0;
         public DataReader rw;
+        public bool isWD = false;
         public payloadType type;
         public StorageFile shareFile = null;
+        public ScrollViewer sViewer = new ScrollViewer();
         public List<int> StackIndex =new List<int>();
+        public ObservableCollection<PeerInformation> peerList = new ObservableCollection<PeerInformation>();
         public ObservableCollection<RemoteSystem> RemoteSystems
         {
             get { return _RemoteSystems; }
@@ -87,9 +90,71 @@ namespace ProjectRome.Views
             ApplicationView.GetForCurrentView().VisibleBoundsChanged += (s, e) => { StartPage_SizeChanged(this, null); };
             SystemNavigationManager.GetForCurrentView().BackRequested += StartPage_BackRequested;
             ////End Test
+            enableWiFiDirect();
             initProjectRomeAPI();
+            
+        }
+#region Wi-Fi Direct Helpers
+
+        public async void enableWiFiDirect()
+        {
+            if(PeerFinder.SupportedDiscoveryTypes!= PeerDiscoveryTypes.None)
+            {
+                PeerFinder.AllowWiFiDirect = true;
+                PeerFinder.Start();
+                PeerFinder.AllowInfrastructure = true;
+            }
         }
 
+        private void Watcher_Removed(PeerWatcher sender, PeerInformation args)
+        {
+            peerList.Remove(args);
+        }
+
+        private void Watcher_Added(PeerWatcher sender, PeerInformation args)
+        {
+            peerList.Add(args);
+        }
+        public void initWatcher()
+        {
+            PeerWatcher watcher = PeerFinder.CreateWatcher();
+            watcher.Added += Watcher_Added;
+            watcher.Removed += Watcher_Removed;
+            watcher.Start();
+        }
+        public async void connectToPeer(string ip,StorageFile file)
+        {
+            PeerWatcher dWDWatcher = PeerFinder.CreateWatcher();
+            dWDWatcher.Added += async (s, e) =>
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                {
+                    if (e.HostName.CanonicalName == ip)
+                    {
+                        transferSocket = await PeerFinder.ConnectAsync(e);
+                        isWD = true;
+                        dWDWatcher.Stop();
+                        await sendPayload(file);
+                        returnToMain();
+                    }
+                });
+               
+            };
+            dWDWatcher.Start();
+            
+            //foreach(var device in peerList)
+            //{
+            //    if(device.HostName.CanonicalName == ip)
+            //    {
+            //        transferSocket = await PeerFinder.ConnectAsync(device);
+            //        isWD = true;
+            //    }
+            //}
+        }
+
+
+
+#endregion
         private void StartPage_BackRequested(object sender, BackRequestedEventArgs e)
         {
             if(StackIndex.Count!=0)
@@ -107,9 +172,9 @@ namespace ProjectRome.Views
 
         private void MainPresenter_Loaded(object sender, RoutedEventArgs ex)
         {
-            var scrollViewer = GetScrollViewer(mainPresenter as ListViewBase);
-            scrollViewer.KeyDown += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
-            scrollViewer.KeyUp += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
+            sViewer = GetScrollViewer(mainPresenter as ListViewBase);
+            sViewer.KeyDown += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
+            sViewer.KeyUp += (s, e) => { if (e.Key == VirtualKey.Down || e.Key == VirtualKey.PageDown || e.Key == VirtualKey.Up || e.Key == VirtualKey.PageUp) e.Handled = true; };
 
         }
 
@@ -193,7 +258,7 @@ namespace ProjectRome.Views
 
         public string getLocalIP()
         {
-            var x = NetworkInformation.GetHostNames().Single(r => r.Type == HostNameType.Ipv4);
+            var x = NetworkInformation.GetHostNames().Single(r => r.Type == HostNameType.Ipv4 && r.IPInformation.NetworkAdapter.GetConnectedProfileAsync().AsTask().Result.IsWlanConnectionProfile);
             return x.CanonicalName.ToString();
         }
 
@@ -219,13 +284,19 @@ namespace ProjectRome.Views
                 {
                     {"host", getLocalIP() },
                     {"type","fileTransfer" },
-                    {"file",file.Name }
+                    {"file",file.Name },
+                    {"isWDs", PeerFinder.SupportedDiscoveryTypes!=PeerDiscoveryTypes.None?"true":"false" }
                 };
                     var response = await sendAppServiceRequest(SelectedRemoteSystem, data);
-                    var x = response["receiveIP"] as string;
-                    remoteHostInfo = new HostName(x);
-                    await sendPayload(file);
-                    returnToMain();
+                    var ip = response["receiveIP"] as string;
+                    remoteHostInfo = new HostName(ip);
+                    if (response["isWDS"] as string == "true")
+                        connectToPeer(ip, file);
+                    else
+                    {
+                        await sendPayload(file);
+                        returnToMain();
+                    }
 
                 }
             }
@@ -247,7 +318,7 @@ namespace ProjectRome.Views
             AppServiceConnection connection = new AppServiceConnection
             {
                 AppServiceName = "com.warpzone.inventory",
-                PackageFamilyName = "dd4ba9a3-acd0-42cf-8bdd-134c36e80ed2_gzkz8cyssw602"
+                PackageFamilyName = "dd4ba9a3-acd0-42cf-8bdd-134c36e80ed2_x5ysvzjnrjtce"
             };
             if (remotesys == null)
             {
@@ -349,7 +420,6 @@ namespace ProjectRome.Views
             double previousHorizontalOffset = default(double), previousVerticalOffset = default(double);
 
             // get the ScrollViewer withtin the ListView/GridView
-            var scrollViewer = GetScrollViewer(listViewBase);
             // get the SelectorItem to scroll to
             var selectorItem = listViewBase.ContainerFromIndex(index) as SelectorItem;
 
@@ -358,8 +428,8 @@ namespace ProjectRome.Views
             {
                 isVirtualizing = true;
 
-                previousHorizontalOffset = scrollViewer.HorizontalOffset;
-                previousVerticalOffset = scrollViewer.VerticalOffset;
+                previousHorizontalOffset = sViewer.HorizontalOffset;
+                previousVerticalOffset = sViewer.VerticalOffset;
 
                 // call task-based ScrollIntoViewAsync to realize the item
                 listViewBase.ScrollIntoView(listViewBase.Items[index]);
@@ -369,16 +439,16 @@ namespace ProjectRome.Views
             }
 
             // calculate the position object in order to know how much to scroll to
-            var transform = selectorItem.TransformToVisual((UIElement)scrollViewer.Content);
+            var transform = selectorItem.TransformToVisual((UIElement)sViewer.Content);
             var position = transform.TransformPoint(new Point(0, 0));
             // when virtualized, scroll back to previous position without animation
             if (isVirtualizing)
             {
-                scrollViewer.ChangeView(previousHorizontalOffset, previousVerticalOffset, 1);
+                sViewer.ChangeView(previousHorizontalOffset, previousVerticalOffset, 1);
             }
-            scrollViewer.IsFocusEngaged = false;
+            sViewer.IsFocusEngaged = false;
             // scroll to desired position with animation!
-            scrollViewer.ChangeView(position.X, position.Y, null);
+            sViewer.ChangeView(position.X, position.Y, null);
         }
 
         private ScrollViewer GetScrollViewer( DependencyObject element)
@@ -433,12 +503,15 @@ namespace ProjectRome.Views
             if (file == null)
                 file = await getFileLocationAsync(PickerType.Open, "", "");
             originalFilename = file.DisplayName;
-            transferSocket = new StreamSocket();
-            transferSocket.Control.KeepAlive = false;
             if (remoteHostInfo != null)
             {
                 loadingVisible = Visibility.Visible;
-                await transferSocket.ConnectAsync(remoteHostInfo, powerPort.ToString());
+                if (isWD)
+                {
+                    transferSocket = new StreamSocket();
+                    transferSocket.Control.KeepAlive = false;
+                    await transferSocket.ConnectAsync(remoteHostInfo, powerPort.ToString());
+                }
                 long streamPosition = 0;
                 long streamSize = 0;
                 byte[] buff = new byte[bufferSize];

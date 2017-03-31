@@ -18,6 +18,7 @@ using Newtonsoft.Json;
 using Windows.UI.Core;
 using Windows.Networking.Connectivity;
 using Windows.Networking;
+using Windows.Networking.Proximity;
 
 namespace WarpzoneBackend
 {
@@ -26,7 +27,7 @@ namespace WarpzoneBackend
         private BackgroundTaskDeferral backgroundTaskDeferral;
         private AppServiceConnection appServiceconnection;
         private string HostIP = "Empty";
-
+        private bool WDRequest = false;
 
         [STAThread]
         public void Run(IBackgroundTaskInstance taskInstance)
@@ -119,6 +120,8 @@ namespace WarpzoneBackend
         {
             //var HostIP = data["host"].ToString();
             //sendToast("Request", "Done!");
+            if (data["isWdS"].ToString() == "true")
+                WDRequest = true;
             switch (data["type"].ToString())
             {
                 case "fileTransfer":
@@ -128,7 +131,8 @@ namespace WarpzoneBackend
                     var payload = new ValueSet()
                     {
                         {"type","fileTransfer" },
-                        {"receiveIP", getLocalIP().CanonicalName.ToString()}
+                        {"receiveIP", getLocalIP().CanonicalName.ToString()},
+                        {"isWDs", PeerFinder.SupportedDiscoveryTypes!=PeerDiscoveryTypes.None?"true":"false" }
                     };
                     args.Request.SendResponseAsync(payload).AsTask().Wait();
                     break;

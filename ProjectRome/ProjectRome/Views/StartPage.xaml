@@ -98,7 +98,10 @@
                 <Grid x:Name="fileTranferBlk">
                     
                 </Grid>
-                <StackPanel x:Name="linkWarpBlk">
+                    <Grid x:Name="directTransferBlk">
+                        
+                    </Grid>
+                <StackPanel Visibility="Collapsed" x:Name="linkWarpBlk">
                     <TextBox MinWidth="250"
                              VerticalAlignment="Center" 
                              HorizontalAlignment="Center"
